@@ -2,44 +2,58 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="icon" href="data:,">
-  <title>Black Fortune | Ultimate Fix</title>
+  <title>Black Fortune | Mobile Optimized</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
       --bg-color: #050505;
       --paper-color: #fdfaf0;
-      --cookie-scale: 1.2;
+      /* PC 端的基礎比例 */
+      --base-scale: 1.2;
       --glow-color: rgba(255, 250, 200, 0.4); 
     }
 
     body {
       margin: 0; background: var(--bg-color); color: #fff;
       font-family: "Palatino", serif; display: flex; flex-direction: column;
-      justify-content: center; align-items: center; min-height: 100vh; overflow: hidden;
+      justify-content: center; align-items: center; min-height: 100vh; 
+      overflow-x: hidden; /* 防止手機橫向滾動 */
     }
 
     #capture-area {
-      padding: 60px 40px; display: flex; flex-direction: column; 
+      padding: 40px 20px; display: flex; flex-direction: column; 
       align-items: center; background: var(--bg-color); position: relative;
     }
 
+    /* 手機端自動放大整體區域 */
+    @media (max-width: 600px) {
+      #capture-area {
+        transform: scale(1.15); /* 手機端整體放大 15% */
+      }
+      .ui-layer {
+        margin-top: 60px !important; /* 補償放大後的間距 */
+      }
+    }
+
     .header h1 { 
-      font-size: 24px; letter-spacing: 8px; font-weight: 300; 
+      font-size: 22px; letter-spacing: 6px; font-weight: 300; 
       margin: 0 0 20px 0; opacity: 0.7; text-transform: uppercase;
     }
 
-    .flavor-picker { margin-bottom: 40px; z-index: 10; }
+    .flavor-picker { margin-bottom: 30px; z-index: 10; }
     
     select {
-      background: rgba(255,255,255,0.05); color: #888; border: 1px solid #333;
-      padding: 8px 16px; cursor: pointer; font-size: 11px; letter-spacing: 2px;
-      border-radius: 0; outline: none;
+      background: rgba(255,255,255,0.08); color: #bbb; border: 1px solid #444;
+      padding: 10px 20px; cursor: pointer; font-size: 13px; /* 手機字體稍大一點方便按 */
+      border-radius: 0; outline: none; -webkit-appearance: none;
     }
 
     .cookie-box {
-      position: relative; width: calc(260px * var(--cookie-scale));
-      height: calc(200px * var(--cookie-scale));
+      position: relative; 
+      width: calc(260px * var(--base-scale));
+      height: calc(200px * var(--base-scale));
       cursor: pointer; perspective: 1200px; z-index: 3;
     }
 
@@ -64,13 +78,13 @@
 
     .cookie-box.open .full-cookie { opacity: 0; pointer-events: none; }
     .cookie-box.open .cookie-part { opacity: 0.35; filter: blur(0.3px); }
-    .cookie-box.open .left-part { transform: translate(-150px, -40px) rotate(-35deg); clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%); }
-    .cookie-box.open .right-part { transform: translate(150px, -40px) rotate(35deg); clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%); }
+    
+    /* 調整碎裂後的位移，適配手機寬度 */
+    .cookie-box.open .left-part { transform: translate(-120px, -30px) rotate(-30deg); clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%); }
+    .cookie-box.open .right-part { transform: translate(120px, -30px) rotate(30deg); clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%); }
 
-    /* 紙條：完全交給 class 控制寬度，不要用 JS 修改 style */
     .paper-strip {
-      position: absolute; top: 50%; left: 50%; 
-      width: 0; height: 75px; /* 初始寬度 0 */
+      position: absolute; top: 50%; left: 50%; width: 0; height: 75px;
       background: var(--paper-color); transform: translate(-50%, -50%);
       z-index: 2; display: flex; justify-content: center; align-items: center;
       transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -78,7 +92,6 @@
       clip-path: polygon(1% 4%, 99% 1%, 98% 96%, 2% 99%);
       overflow: hidden; visibility: hidden;
     }
-    /* 當 open 時，寬度變 280px */
     .cookie-box.open .paper-strip { width: 280px; visibility: visible; }
 
     .paper-text { 
@@ -89,7 +102,7 @@
     .cookie-box.open .paper-text { opacity: 1; }
     
     #enText { font-size: 11px; font-style: italic; font-weight: bold; margin-bottom: 4px; color: #333; }
-    #zhText { font-size: 12px; font-weight: 500; color: #000; }
+    #zhText { font-size: 13px; font-weight: 500; color: #000; }
 
     .divine-glow {
       position: absolute; top: 55%; left: 50%; width: 0; height: 0;
@@ -97,10 +110,14 @@
       transform: translate(-50%, -50%); border-radius: 50%;
       filter: blur(35px); transition: all 1.2s ease-out; opacity: 0; z-index: 1;
     }
-    .cookie-box.open ~ .divine-glow { width: 500px; height: 400px; opacity: 1; }
+    .cookie-box.open ~ .divine-glow { width: 450px; height: 350px; opacity: 1; }
 
-    .ui-layer { margin-top: 40px; display: flex; gap: 15px; }
-    button { background: transparent; color: #555; border: 1px solid #333; padding: 10px 22px; cursor: pointer; font-size: 11px; transition: 0.3s; }
+    .ui-layer { margin-top: 40px; display: flex; gap: 12px; }
+    button { 
+      background: transparent; color: #777; border: 1px solid #333; 
+      padding: 12px 18px; cursor: pointer; font-size: 12px; transition: 0.3s; 
+      -webkit-tap-highlight-color: transparent;
+    }
     button:hover { color: #fff; border-color: #888; background: #111; }
 
     .particle { position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: #555; pointer-events: none; z-index: 6; }
@@ -155,11 +172,9 @@
       .catch(() => {});
 
     box.addEventListener('click', () => {
-      // 如果還在跑動畫、數據沒好、或者已經開了，就不准點
       if (isLocked || !fortunesData || box.classList.contains('open')) return;
       isLocked = true;
 
-      // 1. 準備數據
       const flavor = document.getElementById('flavor').value;
       const list = fortunesData[flavor];
       const item = list[Math.floor(Math.random() * list.length)];
@@ -167,44 +182,42 @@
       document.getElementById('enText').textContent = item.en;
       document.getElementById('zhText').textContent = item.zh;
 
-      // 2. 播放聲音
       crackSound.currentTime = 0;
       crackSound.play().catch(() => {});
 
-      // 3. 觸發動畫
       box.classList.add('open');
-      createParticles(30);
+      createParticles(25);
 
-      // 4. 等 0.9 秒後解鎖，確保動畫跑完
-      setTimeout(() => { isLocked = false; }, 900);
+      setTimeout(() => { isLocked = false; }, 950);
     });
 
     function resetCookie() {
-      // 只有在已經開啟且沒被鎖定的情況下才能 Reset
       if (isLocked || !box.classList.contains('open')) return;
       isLocked = true;
 
-      // 移除 open class，所有的寬度/透明度會根據 CSS transition 自動縮回歸零
       box.classList.remove('open');
 
-      // 等待餅乾完全收合動畫結束 (0.8s)
       setTimeout(() => {
-        // 清空文字內容
         document.getElementById('enText').textContent = "";
         document.getElementById('zhText').textContent = "";
-        
-        // 解鎖，讓使用者可以開下一個
+        void box.offsetWidth; 
         isLocked = false;
       }, 850);
     }
 
     function saveImage() {
       if (!box.classList.contains('open')) return;
-      html2canvas(document.getElementById('capture-area'), { backgroundColor: '#050505', scale: 2 }).then(canvas => {
+      // 手機端截圖時，暫時移除縮放 transform 以免位置偏離
+      const area = document.getElementById('capture-area');
+      const originalTransform = area.style.transform;
+      area.style.transform = "none";
+
+      html2canvas(area, { backgroundColor: '#050505', scale: 3 }).then(canvas => {
         const link = document.createElement('a');
         link.download = 'fortune.png';
         link.href = canvas.toDataURL();
         link.click();
+        area.style.transform = originalTransform;
       });
     }
 
@@ -214,12 +227,12 @@
         p.classList.add('particle');
         box.appendChild(p);
         const angle = Math.random() * Math.PI * 2;
-        const velocity = 80 + Math.random() * 100;
+        const velocity = 60 + Math.random() * 80;
         p.animate([
           { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
           { transform: `translate(calc(-50% + ${Math.cos(angle)*velocity}px), calc(-50% + ${Math.sin(angle)*velocity}px)) scale(0)`, opacity: 0 }
-        ], { duration: 1000, fill: 'forwards' });
-        setTimeout(() => p.remove(), 1000);
+        ], { duration: 800, fill: 'forwards' });
+        setTimeout(() => p.remove(), 800);
       }
     }
   </script>
