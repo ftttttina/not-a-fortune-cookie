@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Black Fortune Cookie</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      background: #0f0f0f;
+      color: #fff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .app {
+      max-width: 420px;
+      width: 90%;
+    }
+
+    h1 {
+      font-weight: 500;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    select, button {
+      background: #1a1a1a;
+      color: #fff;
+      border: 1px solid #333;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 16px;
+      margin: 8px 0;
+      width: 100%;
+    }
+
+    .cookie {
+      margin: 30px auto;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #333, #000);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .cookie:hover {
+      transform: scale(1.05);
+    }
+
+    .fortune {
+      min-height: 80px;
+      font-size: 18px;
+      line-height: 1.4;
+      margin-top: 20px;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .fortune.show {
+      opacity: 1;
+    }
+
+    footer {
+      margin-top: 30px;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>🖤 Black Fortune Cookie</h1>
+
+    <select id="flavor">
+      <option value="life">Life Truth</option>
+      <option value="work">Work & Career</option>
+      <option value="love">Love & Dating</option>
+      <option value="money">Money & Reality</option>
+    </select>
+
+    <div class="cookie" id="cookie">🥠</div>
+
+    <div class="fortune" id="fortune"></div>
+
+    <button onclick="crackCookie()">Crack Another One</button>
+
+    <footer>Not motivational. Just honest.</footer>
+  </div>
+
+  <script>
+    const fortunes = {
+      life: [
+        "You are not special. You're just statistically average.",
+        "Your comfort zone is where your dreams go to die.",
+        "You don't hate your life. You just avoid thinking about it.",
+        "Your potential is impressive. Too bad you rarely use it.",
+        "The problem isn't luck. It's your decisions.",
+        "You keep waiting for motivation. It keeps not coming.",
+        "You are tired because you're running from yourself.",
+        "You're not lost. You're just avoiding the truth.",
+        "Most of your stress comes from pretending you're fine.",
+        "You don't need a sign. You need discipline."
+      ],
+      work: [
+        "Your job doesn't care about your mental health.",
+        "You're replaceable. The company will survive without you.",
+        "Working hard won't fix bad management.",
+        "You're not underpaid. You're over-loyal.",
+        "Your boss isn't impressed. They're just busy.",
+        "Your dream job still feels like a job.",
+        "Meetings are where productivity goes to die.",
+        "Your effort is invisible if the results aren't.",
+        "You're not stuck. You're just afraid to leave.",
+        "Your résumé looks better than your reality."
+      ],
+      love: [
+        "You're not heartbroken. You're just attached to a fantasy.",
+        "They didn't change. You just ignored the red flags.",
+        "Love didn't fail. Your expectations did.",
+        "You're lonely, not in love.",
+        "You miss the idea of them, not who they are.",
+        "You're not hard to love. You're just loving the wrong people.",
+        "Chemistry doesn't mean compatibility.",
+        "You confuse attention with affection.",
+        "They didn't ghost you. They just chose silence over honesty.",
+        "You deserve better. You just don't choose it."
+      ],
+      money: [
+        "Your bank account reflects your priorities.",
+        "You're not broke. You're just bad at saying no.",
+        "You can't budget your way out of denial.",
+        "Your lifestyle is louder than your income.",
+        "You don't need more money. You need fewer excuses.",
+        "You're one impulse buy away from regret.",
+        "Rich habits beat lucky breaks.",
+        "Your future is funded by your discipline today.",
+        "You don't invest because you prefer comfort.",
+        "Your spending is emotional, not logical."
+      ]
+    };
+
+    function crackCookie() {
+      const flavor = document.getElementById("flavor").value;
+      const list = fortunes[flavor];
+      const random = list[Math.floor(Math.random() * list.length)];
+      const fortuneBox = document.getElementById("fortune");
+      fortuneBox.textContent = random;
+      fortuneBox.classList.remove("show");
+      setTimeout(() => fortuneBox.classList.add("show"), 50);
+    }
+
+    document.getElementById("cookie").addEventListener("click", crackCookie);
+  </script>
+</body>
+</html>
