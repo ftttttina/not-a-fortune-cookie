@@ -16,7 +16,6 @@
       margin: 0; background: var(--bg-color); color: #fff;
       font-family: "Palatino", serif; display: flex; flex-direction: column;
       justify-content: center; align-items: center; min-height: 100vh; overflow: hidden;
-      /* 防止手機點擊時出現藍色框 */
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -36,7 +35,7 @@
     select {
       background: rgba(255,255,255,0.05); color: #888; border: 1px solid #333;
       padding: 8px 16px; cursor: pointer; font-size: 11px; letter-spacing: 2px;
-      border-radius: 0; appearance: none; -webkit-appearance: none;
+      border-radius: 0; appearance: none;
     }
 
     .cookie-box {
@@ -48,18 +47,16 @@
       z-index: 3;
     }
 
-    /* 完整餅乾：初始絕對無縫 */
     .full-cookie {
       position: absolute; width: 100%; height: 100%;
-      z-index: 5; transition: opacity 0.1s;
+      z-index: 5; transition: opacity 0.2s;
     }
     .full-cookie img { width: 100%; height: 100%; object-fit: contain; }
 
-    /* 左右兩片：僅在打開時顯現 */
     .cookie-part {
       position: absolute; top: 0; width: 50%; height: 100%;
       overflow: hidden; opacity: 0; 
-      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.1s;
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s;
       z-index: 4;
     }
     .cookie-part img { position: absolute; width: 200%; height: 100%; object-fit: contain; }
@@ -72,16 +69,9 @@
     .cookie-box.open .full-cookie { opacity: 0; pointer-events: none; }
     .cookie-box.open .cookie-part { opacity: 0.6; }
     
-    .cookie-box.open .left-part { 
-      transform: translate(-150px, -40px) rotate(-35deg); 
-      clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%);
-    }
-    .cookie-box.open .right-part { 
-      transform: translate(150px, -40px) rotate(35deg); 
-      clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%);
-    }
+    .cookie-box.open .left-part { transform: translate(-150px, -40px) rotate(-35deg); clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%); }
+    .cookie-box.open .right-part { transform: translate(150px, -40px) rotate(35deg); clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%); }
 
-    /* 紙條與神聖光暈 */
     .paper-strip {
       position: absolute; top: 50%; left: 50%; width: 0; height: 60px;
       background: var(--paper-color); transform: translate(-50%, -50%);
@@ -89,13 +79,13 @@
       transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: 0 0 20px rgba(255,255,255,0.1);
       clip-path: polygon(1% 4%, 99% 1%, 98% 96%, 2% 99%);
-      visibility: hidden; /* 初始完全隱藏 */
+      overflow: hidden;
     }
-    .cookie-box.open .paper-strip { width: 280px; visibility: visible; }
+    .cookie-box.open .paper-strip { width: 280px; }
 
     .paper-text { 
       color: #1a1a1a; opacity: 0; font-size: 13px; text-align: center; width: 260px;
-      transition: opacity 0.4s 0.5s; /* 延遲顯示，等紙條伸長 */
+      transition: opacity 0.3s 0.5s; 
     }
     .cookie-box.open .paper-text { opacity: 1; }
 
@@ -108,10 +98,7 @@
     .cookie-box.open ~ .divine-glow { width: 500px; height: 400px; opacity: 1; }
 
     .ui-layer { margin-top: 30px; display: flex; gap: 15px; }
-    button { 
-      background: transparent; color: #555; border: 1px solid #222; 
-      padding: 10px 22px; cursor: pointer; font-size: 11px; transition: 0.3s; 
-    }
+    button { background: transparent; color: #555; border: 1px solid #222; padding: 10px 22px; cursor: pointer; font-size: 11px; transition: 0.3s; }
     button:hover { color: #fff; border-color: #777; background: #111; }
 
     .particle { position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: #555; pointer-events: none; z-index: 6; }
@@ -146,81 +133,68 @@
   </div>
 
   <div class="ui-layer">
-    <button id="resetBtn" onclick="resetCookie()">RESET DESTINY</button>
+    <button onclick="resetCookie()">RESET DESTINY</button>
     <button onclick="saveImage()">SHARE WISDOM</button>
   </div>
 
   <script>
     const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/ftttttina/not-a-fortune-cookie/refs/heads/main/fortunes.json';
     let fortunesData = null;
-    let isAnimating = false; // 狀態鎖定鎖
+    let isLocked = false; 
     
     const box = document.getElementById('cookieBox');
     const paper = document.getElementById('paperStrip');
     const text = document.getElementById('paperText');
     const crackSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
 
-    // 預加載數據
-    fetch(GITHUB_JSON_URL)
-      .then(res => res.json())
-      .then(data => { fortunesData = data; })
-      .catch(() => { document.getElementById('zhText').textContent = "Wisdom offline."; });
+    fetch(GITHUB_JSON_URL).then(res => res.json()).then(data => { fortunesData = data; });
 
     box.addEventListener('click', () => {
-      // 如果正在動畫中、沒數據、或者已經打開，就跳過
-      if (isAnimating || !fortunesData || box.classList.contains('open')) return;
+      if (isLocked || !fortunesData || box.classList.contains('open')) return;
 
-      isAnimating = true;
-
-      // 播放音效 (增加保護防止報錯)
+      isLocked = true; // 鎖定點擊
       crackSound.currentTime = 0;
       crackSound.play().catch(() => {});
 
-      // 隨機抽籤
       const flavor = document.getElementById('flavor').value;
       const list = fortunesData[flavor];
       const item = list[Math.floor(Math.random() * list.length)];
 
-      // 先填入文字
+      // 關鍵修復：確保填入文字時 opacity 的 transition 正常
       document.getElementById('enText').textContent = item.en;
       document.getElementById('zhText').textContent = item.zh;
 
-      // 執行打開動畫
       box.classList.add('open');
       createParticles(30);
 
-      // 動畫結束後解鎖點擊 (對應 CSS 0.8s)
-      setTimeout(() => { isAnimating = false; }, 800);
+      setTimeout(() => { isLocked = false; }, 800);
     });
 
     function resetCookie() {
-      if (isAnimating || !box.classList.contains('open')) return;
+      if (isLocked || !box.classList.contains('open')) return;
       
-      isAnimating = true;
-      
-      // 1. 紙條先縮回
+      isLocked = true;
+      // 1. 先隱藏文字與縮回紙條
+      text.style.transition = "opacity 0.2s"; 
       text.style.opacity = '0';
       paper.style.width = '0';
       
-      // 2. 餅乾合攏
+      // 2. 等紙條縮回後，餅乾合攏
       setTimeout(() => {
         box.classList.remove('open');
         
-        // 3. 等完全合攏後，清空文字並解除鎖定
+        // 3. 徹底清空數據，恢復初始鎖定與 CSS 延遲
         setTimeout(() => {
           document.getElementById('enText').textContent = "";
           document.getElementById('zhText').textContent = "";
-          paper.style.visibility = "hidden"; // 徹底隱藏
-          isAnimating = false;
+          text.style.transition = ""; // 恢復 CSS 裡的 0.5s 延遲
+          isLocked = false;
         }, 800);
       }, 400);
     }
 
     function saveImage() {
-      html2canvas(document.getElementById('capture-area'), { 
-        backgroundColor: '#050505', 
-        scale: 2 
-      }).then(canvas => {
+      html2canvas(document.getElementById('capture-area'), { backgroundColor: '#050505', scale: 2 }).then(canvas => {
         const link = document.createElement('a');
         link.download = 'black-fortune.png';
         link.href = canvas.toDataURL();
