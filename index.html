@@ -4,13 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="icon" href="data:,">
-  <title>Black Fortune | Mobile Optimized</title>
+  <title>Black Fortune | Premium</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
       --bg-color: #050505;
       --paper-color: #fdfaf0;
-      /* PC 端的基礎比例 */
       --base-scale: 1.2;
       --glow-color: rgba(255, 250, 200, 0.4); 
     }
@@ -19,7 +18,7 @@
       margin: 0; background: var(--bg-color); color: #fff;
       font-family: "Palatino", serif; display: flex; flex-direction: column;
       justify-content: center; align-items: center; min-height: 100vh; 
-      overflow-x: hidden; /* 防止手機橫向滾動 */
+      overflow-x: hidden; position: relative;
     }
 
     #capture-area {
@@ -27,14 +26,10 @@
       align-items: center; background: var(--bg-color); position: relative;
     }
 
-    /* 手機端自動放大整體區域 */
+    /* 手機端放大邏輯 */
     @media (max-width: 600px) {
-      #capture-area {
-        transform: scale(1.15); /* 手機端整體放大 15% */
-      }
-      .ui-layer {
-        margin-top: 60px !important; /* 補償放大後的間距 */
-      }
+      #capture-area { transform: scale(1.15); }
+      .ui-layer { margin-top: 60px !important; }
     }
 
     .header h1 { 
@@ -46,7 +41,7 @@
     
     select {
       background: rgba(255,255,255,0.08); color: #bbb; border: 1px solid #444;
-      padding: 10px 20px; cursor: pointer; font-size: 13px; /* 手機字體稍大一點方便按 */
+      padding: 10px 20px; cursor: pointer; font-size: 13px;
       border-radius: 0; outline: none; -webkit-appearance: none;
     }
 
@@ -79,12 +74,11 @@
     .cookie-box.open .full-cookie { opacity: 0; pointer-events: none; }
     .cookie-box.open .cookie-part { opacity: 0.35; filter: blur(0.3px); }
     
-    /* 調整碎裂後的位移，適配手機寬度 */
     .cookie-box.open .left-part { transform: translate(-120px, -30px) rotate(-30deg); clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%); }
     .cookie-box.open .right-part { transform: translate(120px, -30px) rotate(30deg); clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%); }
 
     .paper-strip {
-      position: absolute; top: 50%; left: 50%; width: 0; height: 75px;
+      position: absolute; top: 50%; left: 50%; width: 0; height: 80px;
       background: var(--paper-color); transform: translate(-50%, -50%);
       z-index: 2; display: flex; justify-content: center; align-items: center;
       transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -101,8 +95,8 @@
     }
     .cookie-box.open .paper-text { opacity: 1; }
     
-    #enText { font-size: 11px; font-style: italic; font-weight: bold; margin-bottom: 4px; color: #333; }
-    #zhText { font-size: 13px; font-weight: 500; color: #000; }
+    #enText { font-size: 10.5px; font-style: italic; font-weight: bold; margin-bottom: 4px; color: #333; }
+    #zhText { font-size: 12px; font-weight: 500; color: #000; }
 
     .divine-glow {
       position: absolute; top: 55%; left: 50%; width: 0; height: 0;
@@ -112,13 +106,20 @@
     }
     .cookie-box.open ~ .divine-glow { width: 450px; height: 350px; opacity: 1; }
 
-    .ui-layer { margin-top: 40px; display: flex; gap: 12px; }
+    .ui-layer { margin-top: 40px; display: flex; gap: 12px; z-index: 10; }
     button { 
       background: transparent; color: #777; border: 1px solid #333; 
-      padding: 12px 18px; cursor: pointer; font-size: 12px; transition: 0.3s; 
-      -webkit-tap-highlight-color: transparent;
+      padding: 12px 18px; cursor: pointer; font-size: 11px; transition: 0.3s; 
     }
     button:hover { color: #fff; border-color: #888; background: #111; }
+
+    /* 頁面最下端的小字 */
+    .footer-note {
+      position: absolute; bottom: 20px; width: 100%;
+      text-align: center; font-size: 10px; color: #333;
+      letter-spacing: 4px; text-transform: uppercase;
+      pointer-events: none; opacity: 0.6;
+    }
 
     .particle { position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: #555; pointer-events: none; z-index: 6; }
   </style>
@@ -156,6 +157,8 @@
     <button onclick="saveImage()">SHARE WISDOM</button>
   </div>
 
+  <div class="footer-note">If it hurts, it works</div>
+
   <script>
     const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/ftttttina/not-a-fortune-cookie/refs/heads/main/fortunes.json';
     let fortunesData = null;
@@ -166,10 +169,7 @@
     const text = document.getElementById('paperText');
     const crackSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
 
-    fetch(GITHUB_JSON_URL)
-      .then(res => res.json())
-      .then(data => { fortunesData = data; })
-      .catch(() => {});
+    fetch(GITHUB_JSON_URL).then(res => res.json()).then(data => { fortunesData = data; });
 
     box.addEventListener('click', () => {
       if (isLocked || !fortunesData || box.classList.contains('open')) return;
@@ -194,9 +194,7 @@
     function resetCookie() {
       if (isLocked || !box.classList.contains('open')) return;
       isLocked = true;
-
       box.classList.remove('open');
-
       setTimeout(() => {
         document.getElementById('enText').textContent = "";
         document.getElementById('zhText').textContent = "";
@@ -207,7 +205,6 @@
 
     function saveImage() {
       if (!box.classList.contains('open')) return;
-      // 手機端截圖時，暫時移除縮放 transform 以免位置偏離
       const area = document.getElementById('capture-area');
       const originalTransform = area.style.transform;
       area.style.transform = "none";
