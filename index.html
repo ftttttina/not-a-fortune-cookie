@@ -2,7 +2,8 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>Black Fortune | Bug Fixed</title>
+  <link rel="icon" href="data:,">
+  <title>Black Fortune | Ultimate Fix</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
@@ -19,9 +20,8 @@
     }
 
     #capture-area {
-      padding: 60px 40px;
-      display: flex; flex-direction: column; align-items: center;
-      background: var(--bg-color); position: relative;
+      padding: 60px 40px; display: flex; flex-direction: column; 
+      align-items: center; background: var(--bg-color); position: relative;
     }
 
     .header h1 { 
@@ -38,8 +38,7 @@
     }
 
     .cookie-box {
-      position: relative;
-      width: calc(260px * var(--cookie-scale));
+      position: relative; width: calc(260px * var(--cookie-scale));
       height: calc(200px * var(--cookie-scale));
       cursor: pointer; perspective: 1200px; z-index: 3;
     }
@@ -68,16 +67,18 @@
     .cookie-box.open .left-part { transform: translate(-150px, -40px) rotate(-35deg); clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%); }
     .cookie-box.open .right-part { transform: translate(150px, -40px) rotate(35deg); clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%); }
 
+    /* 紙條：完全交給 class 控制寬度，不要用 JS 修改 style */
     .paper-strip {
-      position: absolute; top: 50%; left: 50%; width: 0; height: 75px;
+      position: absolute; top: 50%; left: 50%; 
+      width: 0; height: 75px; /* 初始寬度 0 */
       background: var(--paper-color); transform: translate(-50%, -50%);
       z-index: 2; display: flex; justify-content: center; align-items: center;
       transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: 0 0 15px rgba(0,0,0,0.2);
       clip-path: polygon(1% 4%, 99% 1%, 98% 96%, 2% 99%);
-      overflow: hidden;
-      visibility: hidden;
+      overflow: hidden; visibility: hidden;
     }
+    /* 當 open 時，寬度變 280px */
     .cookie-box.open .paper-strip { width: 280px; visibility: visible; }
 
     .paper-text { 
@@ -154,58 +155,47 @@
       .catch(() => {});
 
     box.addEventListener('click', () => {
+      // 如果還在跑動畫、數據沒好、或者已經開了，就不准點
       if (isLocked || !fortunesData || box.classList.contains('open')) return;
       isLocked = true;
 
-      crackSound.currentTime = 0;
-      crackSound.play().catch(() => {});
-
+      // 1. 準備數據
       const flavor = document.getElementById('flavor').value;
       const list = fortunesData[flavor];
       const item = list[Math.floor(Math.random() * list.length)];
-
+      
       document.getElementById('enText').textContent = item.en;
       document.getElementById('zhText').textContent = item.zh;
 
+      // 2. 播放聲音
+      crackSound.currentTime = 0;
+      crackSound.play().catch(() => {});
+
+      // 3. 觸發動畫
       box.classList.add('open');
       createParticles(30);
 
+      // 4. 等 0.9 秒後解鎖，確保動畫跑完
       setTimeout(() => { isLocked = false; }, 900);
     });
 
     function resetCookie() {
+      // 只有在已經開啟且沒被鎖定的情況下才能 Reset
       if (isLocked || !box.classList.contains('open')) return;
       isLocked = true;
 
-      // 1. 先淡出文字
-      text.style.transition = "opacity 0.2s";
-      text.style.opacity = "0";
+      // 移除 open class，所有的寬度/透明度會根據 CSS transition 自動縮回歸零
+      box.classList.remove('open');
 
-      // 2. 強制隱藏紙條
-      paper.style.transition = "none";
-      paper.style.width = "0";
-      paper.style.visibility = "hidden";
-
+      // 等待餅乾完全收合動畫結束 (0.8s)
       setTimeout(() => {
-        // 3. 合起餅乾
-        box.classList.remove('open');
-
-        setTimeout(() => {
-          // 4. 清空文字
-          document.getElementById('enText').textContent = "";
-          document.getElementById('zhText').textContent = "";
-
-          // 5. 還原 transition
-          paper.style.transition = "";
-          text.style.transition = "";
-
-          // 6. 強制 reflow
-          void paper.offsetWidth;
-          void box.offsetWidth;
-
-          isLocked = false;
-        }, 800);
-      }, 300);
+        // 清空文字內容
+        document.getElementById('enText').textContent = "";
+        document.getElementById('zhText').textContent = "";
+        
+        // 解鎖，讓使用者可以開下一個
+        isLocked = false;
+      }, 850);
     }
 
     function saveImage() {
