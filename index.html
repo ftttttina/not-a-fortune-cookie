@@ -21,31 +21,30 @@
       overflow: hidden; position: relative;
     }
 
-    /* --- [新] 包裝層樣式 --- */
+    /* --- [修正] 包裝層樣式：確保拆開後不擋路 --- */
     .package-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(255, 255, 255, 0.02);
-      backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-      z-index: 1000; cursor: pointer;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      z-index: 9999; cursor: pointer;
       display: flex; justify-content: center; align-items: center;
-      transition: transform 1.2s cubic-bezier(0.8, 0, 0.2, 1), opacity 1s ease;
+      transition: transform 1.2s cubic-bezier(0.8, 0, 0.2, 1), opacity 1s ease, visibility 1.2s;
     }
 
     .plastic-shine {
       position: absolute; width: 200%; height: 200%;
-      background: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.04) 50%, transparent 55%);
+      background: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.05) 50%, transparent 55%);
       animation: shine 5s infinite linear;
     }
 
     .package-text {
-      font-size: 10px; letter-spacing: 10px; color: #444; 
-      text-transform: uppercase; z-index: 1001; font-weight: 300;
+      font-size: 10px; letter-spacing: 10px; color: #666; 
+      text-transform: uppercase; z-index: 10000; font-weight: 300;
     }
 
-    /* 拆封後的狀態 */
     .package-overlay.unwrapped {
-      transform: translateY(-100%) skewY(5deg); /* 向上滑出並帶點斜度，模擬撕開感 */
-      opacity: 0; pointer-events: none;
+      transform: translateY(-100%) skewY(5deg);
+      opacity: 0; visibility: hidden;
     }
 
     @keyframes shine {
@@ -53,46 +52,57 @@
       100% { transform: translate(30%, 30%); }
     }
 
-    /* --- 主體內容控制 --- */
+    /* --- [修正] 內容層：拆封前鎖定點擊，拆封後解鎖 --- */
     #capture-area, .ui-layer {
-      transition: filter 1.2s ease, opacity 1.2s ease;
-      filter: blur(10px); opacity: 0.3;
+      transition: filter 1s ease, opacity 1s ease;
+      filter: blur(15px); opacity: 0.1;
+      pointer-events: none; /* 關鍵：未拆封前無法點擊 */
     }
 
     body.ready #capture-area, body.ready .ui-layer {
-      filter: blur(0); opacity: 1;
+      filter: blur(0) !important; 
+      opacity: 1 !important;
+      pointer-events: auto; /* 關鍵：拆封後解鎖所有互動 */
     }
 
-    /* --- 原有樣式保持不變 --- */
+    /* --- 餅乾與 UI 樣式 --- */
     #capture-area { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; background: var(--bg-color); position: relative; }
     @media (max-width: 600px) { #capture-area { transform: scale(1.18); } .ui-layer { margin-top: 65px !important; } }
     .header h1 { font-size: 22px; letter-spacing: 6px; font-weight: 300; margin: 0 0 20px 0; opacity: 0.7; text-transform: uppercase; }
     .flavor-picker { margin-bottom: 30px; z-index: 10; }
-    select { background: rgba(255,255,255,0.08); color: #bbb; border: 1px solid #444; padding: 10px 20px; cursor: pointer; font-size: 13px; border-radius: 0; outline: none; -webkit-appearance: none; }
+    select { background: rgba(255,255,255,0.1); color: #bbb; border: 1px solid #444; padding: 10px 20px; cursor: pointer; font-size: 13px; border-radius: 0; outline: none; -webkit-appearance: none; }
+    
     .cookie-box { position: relative; width: calc(260px * var(--base-scale)); height: calc(200px * var(--base-scale)); cursor: pointer; perspective: 1200px; z-index: 3; }
     .full-cookie { position: absolute; width: 100%; height: 100%; z-index: 5; transition: opacity 0.2s; }
     .full-cookie img { width: 100%; height: 100%; object-fit: contain; }
+    
     .cookie-part { position: absolute; top: 0; width: 50%; height: 100%; overflow: hidden; opacity: 0; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s; z-index: 4; }
     .cookie-part img { position: absolute; width: 200%; height: 100%; object-fit: contain; }
     .left-part { left: 0; transform-origin: left bottom; }
     .left-part img { left: 0; object-position: left center; }
     .right-part { right: 0; transform-origin: right bottom; }
     .right-part img { right: 0; object-position: right center; }
+    
     .cookie-box.open .full-cookie { opacity: 0; pointer-events: none; }
     .cookie-box.open .cookie-part { opacity: 0.4; filter: blur(0.3px); }
     .cookie-box.open .left-part { transform: translate(-125px, -35px) rotate(-32deg); clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%); }
     .cookie-box.open .right-part { transform: translate(125px, -35px) rotate(32deg); clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%); }
+
     .paper-strip { position: absolute; top: 50%; left: 50%; width: 0; height: 80px; background: var(--paper-color); background-image: repeating-linear-gradient(rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 18px); transform: translate(-50%, -50%); z-index: 2; display: flex; justify-content: center; align-items: center; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 15px rgba(0,0,0,0.2); clip-path: polygon(1% 3%, 99% 1%, 98.5% 97%, 1.5% 99%); overflow: hidden; visibility: hidden; }
     .cookie-box.open .paper-strip { width: 285px; visibility: visible; }
+    
     .paper-text { color: #1a1a1a; opacity: 0; text-align: center; width: 88%; word-wrap: break-word; line-height: 1.4; transition: opacity 0.4s 0.6s; }
     .cookie-box.open .paper-text { opacity: 1; }
     #enText { font-size: 12.5px; font-style: italic; font-weight: bold; margin-bottom: 4px; color: #111; letter-spacing: 0.1px; }
     #zhText { font-size: 9px; font-weight: 500; color: #555; letter-spacing: 1px; opacity: 0.8; }
+    
     .divine-glow { position: absolute; top: 55%; left: 50%; width: 0; height: 0; background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%); transform: translate(-50%, -50%); border-radius: 50%; filter: blur(40px); transition: all 1.2s ease-out; opacity: 0; z-index: 1; }
     .cookie-box.open ~ .divine-glow { width: 500px; height: 400px; opacity: 1; }
+    
     .ui-layer { margin-top: 40px; display: flex; gap: 12px; z-index: 10; }
     button { background: transparent; color: #666; border: 1px solid #333; padding: 0 20px; cursor: pointer; font-size: 11px; transition: 0.3s; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; height: 42px; line-height: 1; min-width: 125px; box-sizing: border-box; }
     button:hover { color: #fff; border-color: #777; background: #111; }
+    
     .footer-note { position: absolute; bottom: 25px; width: 100%; text-align: center; font-size: 9px; color: #222; letter-spacing: 5px; text-transform: uppercase; pointer-events: none; transition: all 1s ease; }
     .cookie-box.open ~ .footer-note { color: #444; opacity: 1; letter-spacing: 6px; }
     .particle { position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: #444; pointer-events: none; z-index: 6; }
@@ -141,7 +151,7 @@
     const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/ftttttina/not-a-fortune-cookie/refs/heads/main/fortunes.json';
     let fortunesData = null;
     let isLocked = false; 
-    let isUnwrapped = false; // [新] 追蹤包裝狀態
+    let isUnwrapped = false; 
     
     const box = document.getElementById('cookieBox');
     const crackSound = new Audio('crack.mp3'); 
@@ -149,238 +159,23 @@
 
     fetch(GITHUB_JSON_URL).then(res => res.json()).then(data => { fortunesData = data; });
 
-    // [新] 拆包裝邏輯
+    // 修正後的拆包裝邏輯
     function unwrapCookie() {
       if (isUnwrapped) return;
       isUnwrapped = true;
-      const overlay = document.getElementById('packageOverlay');
-      overlay.classList.add('unwrapped');
-      document.body.classList.add('ready');
-    }
-
-    box.addEventListener('click', () => {
-      if (!isUnwrapped || isLocked || !fortunesData || box.classList.contains('open')) return;
-      isLocked = true;
-
-      const flavor = document.getElementById('flavor').value;
-      const list = fortunesData[flavor];
-      const item = list[Math.floor(Math.random() * list.length)];
       
-      document.getElementById('enText').textContent = item.en;
-      document.getElementById('zhText').textContent = item.zh;
-
-      crackSound.currentTime = 0;
-      crackSound.play().catch(() => {});
-
-      box.classList.add('open');
-      createParticles(25);
-
-      setTimeout(() => { isLocked = false; }, 950);
-    });
-
-    function resetCookie() {
-      if (isLocked || !box.classList.contains('open')) return;
-      isLocked = true;
-      box.classList.remove('open');
-      setTimeout(() => {
-        document.getElementById('enText').textContent = "";
-        document.getElementById('zhText').textContent = "";
-        isLocked = false;
-      }, 850);
-    }
-
-    function saveImage() {
-      if (!box.classList.contains('open')) return;
-      const area = document.getElementById('capture-area');
-      const originalTransform = area.style.transform;
-      area.style.transform = "none";
-
-      html2canvas(area, { backgroundColor: '#050505', scale: 3 }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = `fortune-${Date.now()}.png`;
-        link.href = canvas.toDataURL();
-        link.click();
-        area.style.transform = originalTransform;
-      });
-    }
-
-    function createParticles(count) {
-      for (let i = 0; i < count; i++) {
-        const p = document.createElement('div');
-        p.classList.add('particle');
-        box.appendChild(p);
-        const angle = Math.random() * Math.PI * 2;
-        const velocity = 70 + Math.random() * 90;
-        p.animate([
-          { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
-          { transform: `translate(calc(-50% + ${Math.cos(angle)*velocity}px), calc(-50% + ${Math.sin(angle)*velocity}px)) scale(0)`, opacity: 0 }
-        ], { duration: 850, fill: 'forwards' });
-        setTimeout(() => p.remove(), 900);
-      }
-    }
-  </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <link rel="icon" href="data:,">
-  <title>Black Fortune | Mystery Unwrapped</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <style>
-    :root {
-      --bg-color: #050505;
-      --paper-color: #fdfaf0;
-      --base-scale: 1.2;
-      --glow-color: rgba(255, 250, 200, 0.35); 
-    }
-
-    body {
-      margin: 0; background: var(--bg-color); color: #fff;
-      font-family: "Palatino", serif; display: flex; flex-direction: column;
-      justify-content: center; align-items: center; min-height: 100vh; 
-      overflow: hidden; position: relative;
-    }
-
-    /* --- [新] 包裝層樣式 --- */
-    .package-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(255, 255, 255, 0.02);
-      backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-      z-index: 1000; cursor: pointer;
-      display: flex; justify-content: center; align-items: center;
-      transition: transform 1.2s cubic-bezier(0.8, 0, 0.2, 1), opacity 1s ease;
-    }
-
-    .plastic-shine {
-      position: absolute; width: 200%; height: 200%;
-      background: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.04) 50%, transparent 55%);
-      animation: shine 5s infinite linear;
-    }
-
-    .package-text {
-      font-size: 10px; letter-spacing: 10px; color: #444; 
-      text-transform: uppercase; z-index: 1001; font-weight: 300;
-    }
-
-    /* 拆封後的狀態 */
-    .package-overlay.unwrapped {
-      transform: translateY(-100%) skewY(5deg); /* 向上滑出並帶點斜度，模擬撕開感 */
-      opacity: 0; pointer-events: none;
-    }
-
-    @keyframes shine {
-      0% { transform: translate(-30%, -30%); }
-      100% { transform: translate(30%, 30%); }
-    }
-
-    /* --- 主體內容控制 --- */
-    #capture-area, .ui-layer {
-      transition: filter 1.2s ease, opacity 1.2s ease;
-      filter: blur(10px); opacity: 0.3;
-    }
-
-    body.ready #capture-area, body.ready .ui-layer {
-      filter: blur(0); opacity: 1;
-    }
-
-    /* --- 原有樣式保持不變 --- */
-    #capture-area { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; background: var(--bg-color); position: relative; }
-    @media (max-width: 600px) { #capture-area { transform: scale(1.18); } .ui-layer { margin-top: 65px !important; } }
-    .header h1 { font-size: 22px; letter-spacing: 6px; font-weight: 300; margin: 0 0 20px 0; opacity: 0.7; text-transform: uppercase; }
-    .flavor-picker { margin-bottom: 30px; z-index: 10; }
-    select { background: rgba(255,255,255,0.08); color: #bbb; border: 1px solid #444; padding: 10px 20px; cursor: pointer; font-size: 13px; border-radius: 0; outline: none; -webkit-appearance: none; }
-    .cookie-box { position: relative; width: calc(260px * var(--base-scale)); height: calc(200px * var(--base-scale)); cursor: pointer; perspective: 1200px; z-index: 3; }
-    .full-cookie { position: absolute; width: 100%; height: 100%; z-index: 5; transition: opacity 0.2s; }
-    .full-cookie img { width: 100%; height: 100%; object-fit: contain; }
-    .cookie-part { position: absolute; top: 0; width: 50%; height: 100%; overflow: hidden; opacity: 0; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s; z-index: 4; }
-    .cookie-part img { position: absolute; width: 200%; height: 100%; object-fit: contain; }
-    .left-part { left: 0; transform-origin: left bottom; }
-    .left-part img { left: 0; object-position: left center; }
-    .right-part { right: 0; transform-origin: right bottom; }
-    .right-part img { right: 0; object-position: right center; }
-    .cookie-box.open .full-cookie { opacity: 0; pointer-events: none; }
-    .cookie-box.open .cookie-part { opacity: 0.4; filter: blur(0.3px); }
-    .cookie-box.open .left-part { transform: translate(-125px, -35px) rotate(-32deg); clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%); }
-    .cookie-box.open .right-part { transform: translate(125px, -35px) rotate(32deg); clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%); }
-    .paper-strip { position: absolute; top: 50%; left: 50%; width: 0; height: 80px; background: var(--paper-color); background-image: repeating-linear-gradient(rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 18px); transform: translate(-50%, -50%); z-index: 2; display: flex; justify-content: center; align-items: center; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 15px rgba(0,0,0,0.2); clip-path: polygon(1% 3%, 99% 1%, 98.5% 97%, 1.5% 99%); overflow: hidden; visibility: hidden; }
-    .cookie-box.open .paper-strip { width: 285px; visibility: visible; }
-    .paper-text { color: #1a1a1a; opacity: 0; text-align: center; width: 88%; word-wrap: break-word; line-height: 1.4; transition: opacity 0.4s 0.6s; }
-    .cookie-box.open .paper-text { opacity: 1; }
-    #enText { font-size: 12.5px; font-style: italic; font-weight: bold; margin-bottom: 4px; color: #111; letter-spacing: 0.1px; }
-    #zhText { font-size: 9px; font-weight: 500; color: #555; letter-spacing: 1px; opacity: 0.8; }
-    .divine-glow { position: absolute; top: 55%; left: 50%; width: 0; height: 0; background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%); transform: translate(-50%, -50%); border-radius: 50%; filter: blur(40px); transition: all 1.2s ease-out; opacity: 0; z-index: 1; }
-    .cookie-box.open ~ .divine-glow { width: 500px; height: 400px; opacity: 1; }
-    .ui-layer { margin-top: 40px; display: flex; gap: 12px; z-index: 10; }
-    button { background: transparent; color: #666; border: 1px solid #333; padding: 0 20px; cursor: pointer; font-size: 11px; transition: 0.3s; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; height: 42px; line-height: 1; min-width: 125px; box-sizing: border-box; }
-    button:hover { color: #fff; border-color: #777; background: #111; }
-    .footer-note { position: absolute; bottom: 25px; width: 100%; text-align: center; font-size: 9px; color: #222; letter-spacing: 5px; text-transform: uppercase; pointer-events: none; transition: all 1s ease; }
-    .cookie-box.open ~ .footer-note { color: #444; opacity: 1; letter-spacing: 6px; }
-    .particle { position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: #444; pointer-events: none; z-index: 6; }
-  </style>
-</head>
-<body>
-
-  <div class="package-overlay" id="packageOverlay" onclick="unwrapCookie()">
-    <div class="plastic-shine"></div>
-    <div class="package-text">TAP TO UNWRAP</div>
-  </div>
-
-  <div id="capture-area">
-    <div class="header"><h1>Black Fortune</h1></div>
-    <div class="flavor-picker">
-      <select id="flavor">
-        <option value="life">LIFE 生活</option>
-        <option value="work">WORK 職場</option>
-        <option value="love">LOVE 情感</option>
-        <option value="money">MONEY 金錢</option>
-      </select>
-    </div>
-
-    <div class="cookie-box" id="cookieBox">
-      <div class="full-cookie"><img src="black-cookie.png"></div>
-      <div class="cookie-part left-part"><img src="black-cookie.png"></div>
-      <div class="cookie-part right-part"><img src="black-cookie.png"></div>
-
-      <div class="paper-strip" id="paperStrip">
-        <div class="paper-text" id="paperText">
-          <div id="enText"></div>
-          <div id="zhText"></div>
-        </div>
-      </div>
-    </div>
-    <div class="divine-glow"></div>
-    <div class="footer-note">If it hurts, it works</div>
-  </div>
-
-  <div class="ui-layer">
-    <button onclick="resetCookie()">RESET DESTINY</button>
-    <button onclick="saveImage()">SHARE WISDOM</button>
-  </div>
-
-  <script>
-    const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/ftttttina/not-a-fortune-cookie/refs/heads/main/fortunes.json';
-    let fortunesData = null;
-    let isLocked = false; 
-    let isUnwrapped = false; // [新] 追蹤包裝狀態
-    
-    const box = document.getElementById('cookieBox');
-    const crackSound = new Audio('crack.mp3'); 
-    crackSound.preload = 'auto';
-
-    fetch(GITHUB_JSON_URL).then(res => res.json()).then(data => { fortunesData = data; });
-
-    // [新] 拆包裝邏輯
-    function unwrapCookie() {
-      if (isUnwrapped) return;
-      isUnwrapped = true;
       const overlay = document.getElementById('packageOverlay');
       overlay.classList.add('unwrapped');
       document.body.classList.add('ready');
+
+      // 動畫結束後徹底移除元素，避免擋住點擊
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 1200);
     }
 
     box.addEventListener('click', () => {
+      // 確保包裝拆開後才能點擊餅乾
       if (!isUnwrapped || isLocked || !fortunesData || box.classList.contains('open')) return;
       isLocked = true;
 
