@@ -1,164 +1,255 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>Black Fortune Cookie</title>
+  <title>Black Fortune Cookie | 黑色幸運餅乾</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
+    :root {
+      --bg-color: #0f0f0f;
+      --cookie-color: #222;
+      --accent-color: #fff;
+    }
+
     body {
       margin: 0;
-      background: #0f0f0f;
-      color: #fff;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-color);
+      color: var(--accent-color);
+      font-family: system-ui, -apple-system, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      text-align: center;
+      overflow: hidden;
     }
 
     .app {
       max-width: 420px;
       width: 90%;
+      text-align: center;
     }
 
     h1 {
-      font-weight: 500;
-      letter-spacing: 1px;
-      margin-bottom: 20px;
+      font-weight: 300;
+      letter-spacing: 2px;
+      margin-bottom: 30px;
+      opacity: 0.8;
     }
 
-    select, button {
+    select {
       background: #1a1a1a;
       color: #fff;
       border: 1px solid #333;
-      padding: 10px 14px;
+      padding: 10px;
       border-radius: 6px;
-      font-size: 16px;
-      margin: 8px 0;
       width: 100%;
+      margin-bottom: 40px;
+      outline: none;
     }
 
-    .cookie {
-      margin: 30px auto;
-      width: 160px;
-      height: 160px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #333, #000);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    /* 餅乾容器 */
+    .cookie-wrapper {
+      position: relative;
+      width: 200px;
+      height: 150px;
+      margin: 0 auto;
       cursor: pointer;
-      transition: transform 0.2s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
-    .cookie:hover {
-      transform: scale(1.05);
+    /* 餅乾兩半的共通樣式 */
+    .cookie-half {
+      position: absolute;
+      width: 100px;
+      height: 120px;
+      background: radial-gradient(circle at center, #444 0%, #000 100%);
+      border: 1px solid #333;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 2;
     }
 
-    .fortune {
-      min-height: 80px;
-      font-size: 18px;
-      line-height: 1.4;
-      margin-top: 20px;
+    .left {
+      left: 10px;
+      border-radius: 100px 20px 20px 100px;
+      transform-origin: left bottom;
+    }
+
+    .right {
+      right: 10px;
+      border-radius: 20px 100px 100px 20px;
+      transform-origin: right bottom;
+    }
+
+    /* 紙條樣式 */
+    .paper {
+      position: absolute;
+      width: 140px;
+      background: #fff;
+      color: #000;
+      padding: 5px 10px;
+      font-size: 14px;
+      font-weight: bold;
+      transform: scaleX(0);
+      transition: all 0.4s ease;
+      z-index: 1;
+      white-space: nowrap;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    /* 動畫狀態 */
+    .cookie-wrapper.open .left {
+      transform: rotate(-45deg) translate(-50px, -20px);
+      opacity: 0.5;
+    }
+
+    .cookie-wrapper.open .right {
+      transform: rotate(45deg) translate(50px, -20px);
+      opacity: 0.5;
+    }
+
+    .cookie-wrapper.open .paper {
+      transform: scaleX(1);
+    }
+
+    /* 下方籤文顯示 */
+    .fortune-display {
+      margin-top: 50px;
+      min-height: 60px;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      font-weight: 300;
+      color: #ccc;
+      transition: opacity 0.5s ease;
       opacity: 0;
-      transition: opacity 0.4s ease;
     }
 
-    .fortune.show {
+    .fortune-display.show {
       opacity: 1;
     }
 
-    footer {
+    button {
       margin-top: 30px;
-      font-size: 12px;
-      color: #666;
+      background: none;
+      border: 1px solid #444;
+      color: #888;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      border-color: #fff;
+      color: #fff;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 20px;
+      font-size: 10px;
+      color: #444;
+      letter-spacing: 1px;
     }
   </style>
 </head>
 <body>
+
   <div class="app">
-    <h1>🖤 Black Fortune Cookie</h1>
+    <h1>BLACK FORTUNE</h1>
 
     <select id="flavor">
-      <option value="life">Life Truth</option>
-      <option value="work">Work & Career</option>
-      <option value="love">Love & Dating</option>
-      <option value="money">Money & Reality</option>
+      <option value="life">生活真相 (Life)</option>
+      <option value="work">職場現實 (Work)</option>
+      <option value="love">情感幻覺 (Love)</option>
+      <option value="money">金錢貧瘠 (Money)</option>
     </select>
 
-    <div class="cookie" id="cookie">🥠</div>
+    <div class="cookie-wrapper" id="cookieWrapper">
+      <div class="cookie-half left"></div>
+      <div class="paper">真相在此</div>
+      <div class="cookie-half right"></div>
+    </div>
 
-    <div class="fortune" id="fortune"></div>
+    <div class="fortune-display" id="fortuneText"></div>
 
-    <button onclick="crackCookie()">Crack Another One</button>
-
-    <footer>Not motivational. Just honest.</footer>
+    <button onclick="resetCookie()">重置餅乾</button>
   </div>
+
+  <footer>NOT MOTIVATIONAL. JUST HONEST.</footer>
 
   <script>
     const fortunes = {
       life: [
-        "You are not special. You're just statistically average.",
-        "Your comfort zone is where your dreams go to die.",
-        "You don't hate your life. You just avoid thinking about it.",
-        "Your potential is impressive. Too bad you rarely use it.",
-        "The problem isn't luck. It's your decisions.",
-        "You keep waiting for motivation. It keeps not coming.",
-        "You are tired because you're running from yourself.",
-        "You're not lost. You're just avoiding the truth.",
-        "Most of your stress comes from pretending you're fine.",
-        "You don't need a sign. You need discipline."
+        "你並不特別，你只是統計學上的平均值。",
+        "舒適圈是你夢想火化的地方。",
+        "你不是討厭生活，你只是在逃避思考。",
+        "你的潛力很驚人，可惜你幾乎沒用過。",
+        "問題不在運氣，在於你的決定。",
+        "你一直在等動力，它也一直在等你動。"
       ],
       work: [
-        "Your job doesn't care about your mental health.",
-        "You're replaceable. The company will survive without you.",
-        "Working hard won't fix bad management.",
-        "You're not underpaid. You're over-loyal.",
-        "Your boss isn't impressed. They're just busy.",
-        "Your dream job still feels like a job.",
-        "Meetings are where productivity goes to die.",
-        "Your effort is invisible if the results aren't.",
-        "You're not stuck. You're just afraid to leave.",
-        "Your résumé looks better than your reality."
+        "你的公司並不在乎你的心理健康。",
+        "你是可以被取代的，公司沒你活得更好。",
+        "努力工作治不好糟糕的管理層。",
+        "你不是薪水太低，是太過忠誠。",
+        "老闆沒被你感動，他只是很忙。",
+        "夢想的工作，本質還是工作。"
       ],
       love: [
-        "You're not heartbroken. You're just attached to a fantasy.",
-        "They didn't change. You just ignored the red flags.",
-        "Love didn't fail. Your expectations did.",
-        "You're lonely, not in love.",
-        "You miss the idea of them, not who they are.",
-        "You're not hard to love. You're just loving the wrong people.",
-        "Chemistry doesn't mean compatibility.",
-        "You confuse attention with affection.",
-        "They didn't ghost you. They just chose silence over honesty.",
-        "You deserve better. You just don't choose it."
+        "你不是心碎，你只是對幻想產生了戒斷反應。",
+        "他們沒變，是你一直無視那些紅燈。",
+        "愛情沒失敗，是你過高的期望失敗了。",
+        "你是感到寂寞，而不是愛。",
+        "你懷念的是那段時光，不是那個人。",
+        "化學反應不代表你們真的合得來。"
       ],
       money: [
-        "Your bank account reflects your priorities.",
-        "You're not broke. You're just bad at saying no.",
-        "You can't budget your way out of denial.",
-        "Your lifestyle is louder than your income.",
-        "You don't need more money. You need fewer excuses.",
-        "You're one impulse buy away from regret.",
-        "Rich habits beat lucky breaks.",
-        "Your future is funded by your discipline today.",
-        "You don't invest because you prefer comfort.",
-        "Your spending is emotional, not logical."
+        "你的銀行存款反映了你的優先順序。",
+        "你不是窮，你是無法對慾望說不。",
+        "你無法靠著自我暗示走出財務危機。",
+        "你的生活方式比你的收入還響亮。",
+        "你不需要更多錢，你需要更少的藉口。"
       ]
     };
 
+    // 準備音效
+    const crackSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+    crackSound.volume = 0.6;
+
+    const wrapper = document.getElementById('cookieWrapper');
+    const fortuneText = document.getElementById('fortuneText');
+    const flavorSelect = document.getElementById('flavor');
+
     function crackCookie() {
-      const flavor = document.getElementById("flavor").value;
+      if (wrapper.classList.contains('open')) return;
+
+      // 播放碎裂聲
+      crackSound.currentTime = 0;
+      crackSound.play();
+
+      // 觸發動畫
+      wrapper.classList.add('open');
+
+      // 隨機選取籤文
+      const flavor = flavorSelect.value;
       const list = fortunes[flavor];
       const random = list[Math.floor(Math.random() * list.length)];
-      const fortuneBox = document.getElementById("fortune");
-      fortuneBox.textContent = random;
-      fortuneBox.classList.remove("show");
-      setTimeout(() => fortuneBox.classList.add("show"), 50);
+
+      // 延遲顯示文字，讓動畫跑完
+      setTimeout(() => {
+        fortuneText.textContent = random;
+        fortuneText.classList.add('show');
+      }, 400);
     }
 
-    document.getElementById("cookie").addEventListener("click", crackCookie);
+    function resetCookie() {
+      wrapper.classList.remove('open');
+      fortuneText.classList.remove('show');
+    }
+
+    wrapper.addEventListener('click', crackCookie);
   </script>
 </body>
 </html>
