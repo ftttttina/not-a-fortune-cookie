@@ -10,8 +10,7 @@
     :root {
       --bg-color: #050505;
       --paper-color: #fdfaf0;
-      /* 餅乾放大 1.1 倍 */
-      --base-scale: 1.32; 
+      --base-scale: 1.32; /* 餅乾已放大 1.1 倍 */
       --glow-color: rgba(255, 250, 200, 0.35); 
     }
 
@@ -22,7 +21,7 @@
       overflow: hidden; position: relative;
     }
 
-    /* --- 磨砂透明包裝層 --- */
+    /* --- 包裝層 --- */
     .package-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(255, 255, 255, 0.01); 
@@ -43,41 +42,59 @@
     .package-text {
       font-size: 10px; letter-spacing: 12px; color: rgba(255,255,255,0.4); 
       text-transform: uppercase; z-index: 10000; font-weight: 300;
-      text-shadow: 0 0 10px rgba(255,255,255,0.2);
     }
 
     .package-overlay.unwrapped { transform: translateY(-100%); opacity: 0; visibility: hidden; }
 
-    @keyframes shine {
-      0% { transform: translate(-30%, -30%); }
-      50% { transform: translate(10%, 10%); }
-      100% { transform: translate(-30%, -30%); }
+    /* --- 內容層：初始放大 1.5 倍並模糊 --- */
+    #capture-area { 
+      padding: 40px 20px; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      background: var(--bg-color); 
+      position: relative;
+      /* 初始狀態 */
+      transform: scale(1.5); 
+      filter: blur(15px); 
+      opacity: 0.5;
+      transition: transform 1.5s cubic-bezier(0.2, 0, 0.2, 1), filter 1.2s ease, opacity 1.2s ease;
+      transform-origin: center center;
     }
 
-    /* --- 內容層控制 --- */
-    #capture-area, .ui-layer {
-      transition: filter 1s ease, opacity 1s ease;
-      filter: blur(5px); opacity: 0.7;
-      pointer-events: none;
+    /* 手機端基礎縮放補償 */
+    @media (max-width: 600px) { 
+      #capture-area { transform: scale(1.8); } /* 手機端初始更大 */
     }
 
-    body.ready #capture-area, body.ready .ui-layer {
-      filter: blur(0) !important; opacity: 1 !important;
+    /* 拆封後的正常大小狀態 */
+    body.ready #capture-area {
+      transform: scale(1) !important;
+      filter: blur(0) !important; 
+      opacity: 1 !important;
       pointer-events: auto;
     }
 
-    #capture-area { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; background: var(--bg-color); position: relative; }
-    @media (max-width: 600px) { #capture-area { transform: scale(1.18); } .ui-layer { margin-top: 65px !important; } }
-    
-    .header h1 { font-size: 22px; letter-spacing: 6px; font-weight: 300; margin: 0 0 20px 0; opacity: 0.7; text-transform: uppercase; }
+    /* UI 按鈕層也同步縮放動畫 */
+    .ui-layer { 
+      margin-top: 40px; 
+      display: flex; 
+      gap: 12px; 
+      z-index: 10;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 1s ease 0.5s; /* 延遲一點點出現 */
+    }
+    body.ready .ui-layer { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
-    /* --- 修正：選項按鈕居中 --- */
+    /* --- 其他樣式保持不變 --- */
+    .header h1 { font-size: 22px; letter-spacing: 6px; font-weight: 300; margin: 0 0 20px 0; opacity: 0.7; text-transform: uppercase; }
     .flavor-picker { margin-bottom: 30px; z-index: 10; display: flex; justify-content: center; }
     select { 
       background: rgba(255,255,255,0.1); color: #bbb; border: 1px solid #444; 
       padding: 10px 0; width: 160px; cursor: pointer; font-size: 13px; 
       border-radius: 0; outline: none; -webkit-appearance: none; -moz-appearance: none; appearance: none;
-      text-align: center; text-align-last: center; /* 強制文字與選項居中 */
+      text-align: center; text-align-last: center;
     }
     
     .cookie-box { position: relative; width: calc(260px * var(--base-scale)); height: calc(200px * var(--base-scale)); cursor: pointer; perspective: 1200px; z-index: 3; }
@@ -96,30 +113,16 @@
     .cookie-box.open .left-part { transform: translate(-145px, -35px) rotate(-32deg); clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%); }
     .cookie-box.open .right-part { transform: translate(145px, -35px) rotate(32deg); clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%); }
 
-    /* 紙條寬度 90% */
-    .paper-strip { 
-      position: absolute; top: 50%; left: 50%; width: 0; height: 80px; 
-      background: var(--paper-color); 
-      background-image: repeating-linear-gradient(rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 18px); 
-      transform: translate(-50%, -50%); z-index: 2; display: flex; justify-content: center; align-items: center; 
-      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
-      box-shadow: 0 0 15px rgba(0,0,0,0.2); 
-      clip-path: polygon(1% 3%, 99% 1%, 98.5% 97%, 1.5% 99%); 
-      overflow: hidden; visibility: hidden; 
-    }
+    .paper-strip { position: absolute; top: 50%; left: 50%; width: 0; height: 80px; background: var(--paper-color); transform: translate(-50%, -50%); z-index: 2; display: flex; justify-content: center; align-items: center; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 15px rgba(0,0,0,0.2); clip-path: polygon(1% 3%, 99% 1%, 98.5% 97%, 1.5% 99%); overflow: hidden; visibility: hidden; }
     .cookie-box.open .paper-strip { width: 256px; visibility: visible; }
-    
     .paper-text { color: #1a1a1a; opacity: 0; text-align: center; width: 88%; word-wrap: break-word; line-height: 1.4; transition: opacity 0.4s 0.6s; }
     .cookie-box.open .paper-text { opacity: 1; }
-    
-    /* 內容字體 90% */
     #enText { font-size: 11.2px; font-style: italic; font-weight: bold; margin-bottom: 4px; color: #111; letter-spacing: 0.1px; }
     #zhText { font-size: 8.1px; font-weight: 500; color: #555; letter-spacing: 1px; opacity: 0.8; }
     
     .divine-glow { position: absolute; top: 55%; left: 50%; width: 0; height: 0; background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%); transform: translate(-50%, -50%); border-radius: 50%; filter: blur(40px); transition: all 1.2s ease-out; opacity: 0; z-index: 1; }
     .cookie-box.open ~ .divine-glow { width: 500px; height: 400px; opacity: 1; }
     
-    .ui-layer { margin-top: 40px; display: flex; gap: 12px; z-index: 10; }
     button { background: transparent; color: #666; border: 1px solid #333; padding: 0 20px; cursor: pointer; font-size: 11px; transition: 0.3s; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; height: 42px; line-height: 1; min-width: 125px; box-sizing: border-box; }
     button:hover { color: #fff; border-color: #777; background: #111; }
     
@@ -175,7 +178,6 @@
     
     const box = document.getElementById('cookieBox');
     const crackSound = new Audio('crack.mp3'); 
-    crackSound.preload = 'auto';
 
     fetch(GITHUB_JSON_URL).then(res => res.json()).then(data => { fortunesData = data; });
 
