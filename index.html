@@ -2,12 +2,14 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>Black Fortune Cookie | Cloud Edition</title>
+  <title>Black Fortune Cookie | Realistic Crack</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root {
       --bg-color: #050505;
       --paper-color: #fdfaf0;
+      /* 定義縮放比例 */
+      --cookie-scale: 1.2; 
     }
 
     body {
@@ -22,116 +24,98 @@
       overflow: hidden;
     }
 
-    .app {
-      max-width: 500px;
-      width: 95%;
-      text-align: center;
-    }
-
+    .app { max-width: 500px; width: 95%; text-align: center; }
     .header h1 { font-size: 28px; letter-spacing: 6px; font-weight: 300; margin-bottom: 40px; }
     
     select {
-      background: #111;
-      color: #777;
-      border: 1px solid #222;
-      padding: 10px 20px;
-      margin-bottom: 40px;
-      outline: none;
-      cursor: pointer;
+      background: #111; color: #777; border: 1px solid #222;
+      padding: 10px 20px; margin-bottom: 60px; outline: none; cursor: pointer;
     }
 
-    /* 餅乾容器 */
+    /* 餅乾容器：稍微放大 */
     .cookie-box {
       position: relative;
-      width: 260px;
-      height: 200px;
+      width: calc(260px * var(--cookie-scale));
+      height: calc(200px * var(--cookie-scale));
       margin: 0 auto;
       cursor: pointer;
-      perspective: 1000px;
+      perspective: 1200px;
     }
 
     .cookie-part {
       position: absolute;
-      width: 130px;
-      height: 200px;
+      width: 50%;
+      height: 100%;
       background-image: url('black-cookie.png');
-      background-size: 260px 200px;
-      transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+      background-size: 100% 100%; /* 讓單邊背景填滿 */
+      transition: all 0.9s cubic-bezier(0.2, 1, 0.3, 1);
       z-index: 3;
     }
 
-    .left-part { left: 0; background-position: left; transform-origin: left bottom; }
-    .right-part { right: 0; background-position: right; transform-origin: right bottom; }
+    /* 重點：不規則切口 (Crack Effect) */
+    .left-part { 
+      left: 0; 
+      background-position: left; 
+      transform-origin: left bottom;
+      /* 左半部右側邊緣不規則 */
+      clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%);
+    }
 
-    /* 紙條動畫 */
+    .right-part { 
+      right: 0; 
+      background-position: right; 
+      transform-origin: right bottom;
+      /* 右半部左側邊緣不規則，並與左側咬合 */
+      clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%);
+    }
+
+    /* 紙條：縮小一點點，增加真實感 */
     .paper-strip {
       position: absolute;
       top: 50%;
       left: 50%;
       width: 0;
-      height: 75px;
+      height: 65px; /* 高度縮小 */
       background-color: var(--paper-color);
-      background-image: linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.08) 50%, transparent 52%);
+      background-image: linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.06) 50%, transparent 52%);
       transform: translate(-50%, -50%);
       z-index: 2;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
       overflow: hidden;
-      clip-path: polygon(1% 4%, 99% 0%, 100% 96%, 0% 100%);
-      transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      clip-path: polygon(1% 5%, 98% 2%, 99% 95%, 2% 98%); /* 紙條邊緣微翹感 */
+      transition: width 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.1);
     }
 
     .cookie-box.open .paper-strip {
-      width: 320px;
-      animation: paper-shake 0.6s ease-out forwards;
+      width: 260px; /* 寬度稍微縮短 */
+      animation: paper-shake 0.7s ease-out forwards;
     }
 
-    @keyframes paper-shake {
-      0% { transform: translate(-50%, -50%) rotate(0deg) scale(0.8); }
-      20% { transform: translate(-50%, -55%) rotate(2deg) scale(1.05); }
-      100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
-    }
-
+    /* 紙條文字：微調字體大小確保不溢出 */
     .paper-text {
-      color: #1a1a1a;
-      opacity: 0;
-      width: 300px;
-      text-align: center;
-      transition: opacity 0.3s ease 0.4s;
+      color: #1a1a1a; opacity: 0; width: 240px; text-align: center;
+      transition: opacity 0.3s ease 0.5s;
     }
-
     .cookie-box.open .paper-text { opacity: 1; }
-    .en-paper { font-size: 14px; font-style: italic; font-weight: bold; display: block; margin-bottom: 4px; line-height: 1.2; }
-    .zh-paper { font-size: 12px; color: #444; display: block; letter-spacing: 1px; }
+    .en-paper { font-size: 13px; font-style: italic; font-weight: bold; margin-bottom: 2px; }
+    .zh-paper { font-size: 11px; color: #333; letter-spacing: 0.5px; }
 
-    /* 餅乾裂開狀態 */
-    .cookie-box.open .left-part { transform: translate(-120px, -50px) rotate(-45deg); opacity: 0.2; }
-    .cookie-box.open .right-part { transform: translate(120px, -50px) rotate(45deg); opacity: 0.2; }
+    /* 裂開後的位移：稍微加大間距顯示紙條 */
+    .cookie-box.open .left-part { transform: translate(-140px, -60px) rotate(-35deg); opacity: 0.3; }
+    .cookie-box.open .right-part { transform: translate(140px, -60px) rotate(35deg); opacity: 0.3; }
 
-    /* 碎屑噴發樣式 */
+    /* 碎屑噴發 */
     .particle {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 4px;
-      height: 4px;
-      background: #333;
-      border-radius: 1px;
-      pointer-events: none;
-      z-index: 4;
+      position: absolute; top: 50%; left: 50%; width: 5px; height: 5px;
+      background: #222; border-radius: 1px; pointer-events: none; z-index: 4;
     }
 
     button {
-      margin-top: 60px;
-      background: none;
-      border: 1px solid #333;
-      color: #555;
-      padding: 10px 20px;
-      cursor: pointer;
-      transition: 0.3s;
+      margin-top: 50px; background: none; border: 1px solid #333;
+      color: #555; padding: 10px 20px; cursor: pointer; transition: 0.3s;
     }
     button:hover { color: #fff; border-color: #666; }
   </style>
@@ -140,7 +124,6 @@
 
   <div class="app">
     <div class="header"><h1>BLACK FORTUNE</h1></div>
-
     <select id="flavor">
       <option value="life">LIFE 生活</option>
       <option value="work">WORK 職場</option>
@@ -158,40 +141,24 @@
       <div class="cookie-part left-part"></div>
       <div class="cookie-part right-part"></div>
     </div>
-
     <button onclick="reset()">RESET DESTINY</button>
   </div>
 
   <script>
     const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/ftttttina/not-a-fortune-cookie/refs/heads/main/fortunes.json';
-    
     let fortunesData = null;
     const sound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
     const box = document.getElementById('cookieBox');
 
-    // 初始化載入
     fetch(GITHUB_JSON_URL)
-      .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok');
-        return res.json();
-      })
-      .then(data => {
-        fortunesData = data;
-        console.log("資料載入成功");
-      })
-      .catch(err => {
-        console.error("載入失敗:", err);
-        document.getElementById('zhText').textContent = "JSON 載入失敗，請檢查網址。";
-      });
+      .then(res => res.json())
+      .then(data => { fortunesData = data; })
+      .catch(err => { document.getElementById('zhText').textContent = "連線失敗"; });
 
     box.addEventListener('click', () => {
       if (!fortunesData || box.classList.contains('open')) return;
-      
-      sound.currentTime = 0;
-      sound.play();
-
-      // 觸發碎屑噴發
-      createParticles(25);
+      sound.currentTime = 0; sound.play();
+      createParticles(30); // 增加碎屑量
 
       const flavor = document.getElementById('flavor').value;
       const list = fortunesData[flavor];
@@ -199,7 +166,6 @@
 
       document.getElementById('enText').textContent = item.en;
       document.getElementById('zhText').textContent = item.zh;
-
       box.classList.add('open');
     });
 
@@ -208,29 +174,19 @@
         const p = document.createElement('div');
         p.classList.add('particle');
         box.appendChild(p);
-
         const angle = Math.random() * Math.PI * 2;
-        const velocity = 60 + Math.random() * 140;
+        const velocity = 80 + Math.random() * 160;
         const tx = Math.cos(angle) * velocity;
         const ty = Math.sin(angle) * velocity;
-        const rot = Math.random() * 360;
-
         p.animate([
           { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
-          { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) rotate(${rot}deg) scale(0)`, opacity: 0 }
-        ], {
-          duration: 700 + Math.random() * 300,
-          easing: 'cubic-bezier(0, .9, .57, 1)',
-          fill: 'forwards'
-        });
-
+          { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity: 0 }
+        ], { duration: 800, easing: 'ease-out', fill: 'forwards' });
         setTimeout(() => p.remove(), 1000);
       }
     }
 
-    function reset() {
-      box.classList.remove('open');
-    }
+    function reset() { box.classList.remove('open'); }
   </script>
 </body>
 </html>
