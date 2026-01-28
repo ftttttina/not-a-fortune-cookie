@@ -9,7 +9,7 @@
   <style>
     :root {
       --bg-color: #050505;
-      /* 紙條底色改為帶有燒灼感的淺灰色 */
+      /* 這裡同步了你要求的淺灰色焦灼感紙張 */
       --paper-color: #c0c0c0;
       --base-scale: 1.32; 
       --glow-color: rgba(255, 250, 200, 0.6); 
@@ -22,7 +22,7 @@
       overflow: hidden; position: relative;
     }
 
-    /* --- 包裝層 (0.01 透明度 & 光影修復) --- */
+    /* --- 包裝層 --- */
     .package-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(255, 255, 255, 0.01); 
@@ -54,7 +54,7 @@
       100% { transform: translate(-30%, -30%); }
     }
 
-    /* --- 內容層 (初始放大 & 0.7 初始透明度) --- */
+    /* --- 內容層 --- */
     #capture-area { 
       padding: 40px 20px; 
       display: flex; flex-direction: column; align-items: center; 
@@ -88,7 +88,6 @@
       text-align: center; text-align-last: center;
     }
     
-    /* 餅乾主體 */
     .cookie-box { position: relative; width: calc(260px * var(--base-scale)); height: calc(200px * var(--base-scale)); cursor: pointer; perspective: 1200px; z-index: 3; }
     .full-cookie { position: absolute; width: 100%; height: 100%; z-index: 5; transition: opacity 0.2s; }
     .full-cookie img { width: 100%; height: 100%; object-fit: contain; }
@@ -105,7 +104,7 @@
     .cookie-box.open .left-part { transform: translate(-145px, -35px) rotate(-32deg); clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%); }
     .cookie-box.open .right-part { transform: translate(145px, -35px) rotate(32deg); clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%); }
 
-    /* 紙條效果：淺灰色、碳灰纖維紋理、燒灼感邊緣陰影 */
+    /* 紙條優化：灰色焦痕質感 */
     .paper-strip { 
       position: absolute; top: 50%; left: 50%; width: 0; height: 80px; 
       background: var(--paper-color); 
@@ -114,9 +113,7 @@
         repeating-linear-gradient(rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 15px); 
       transform: translate(-50%, -50%); z-index: 2; display: flex; justify-content: center; align-items: center; 
       transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
-      box-shadow: 
-        inset 0 0 15px rgba(0,0,0,0.2),
-        0 0 10px rgba(0,0,0,0.3); 
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.2), 0 0 10px rgba(0,0,0,0.3); 
       clip-path: polygon(1% 4%, 98.5% 2%, 99.5% 96%, 1.5% 98%); 
       overflow: hidden; visibility: hidden; 
     }
@@ -128,7 +125,6 @@
     #enText { font-size: 11.2px; font-style: italic; font-weight: bold; margin-bottom: 4px; color: #111; letter-spacing: 0.1px; }
     #zhText { font-size: 8.1px; font-weight: 500; color: #333; letter-spacing: 1px; opacity: 0.9; }
     
-    /* 背景光圈 - 加強版 */
     .divine-glow { 
       position: absolute; top: 55%; left: 50%; width: 0; height: 0; 
       background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%); 
@@ -137,7 +133,6 @@
     }
     .cookie-box.open ~ .divine-glow { width: 650px; height: 550px; opacity: 1; }
     
-    /* 底部標語亮度優化 */
     .footer-note { 
       position: absolute; bottom: 25px; width: 100%; text-align: center; 
       font-size: 9px; color: #666; letter-spacing: 5px; text-transform: uppercase; 
@@ -169,9 +164,9 @@
     </div>
 
     <div class="cookie-box" id="cookieBox">
-      <div class="full-cookie"><img src="black-cookie.png"></div>
-      <div class="cookie-part left-part"><img src="black-cookie.png"></div>
-      <div class="cookie-part right-part"><img src="black-cookie.png"></div>
+      <div class="full-cookie"><img src="black-cookie.png" crossorigin="anonymous"></div>
+      <div class="cookie-part left-part"><img src="black-cookie.png" crossorigin="anonymous"></div>
+      <div class="cookie-part right-part"><img src="black-cookie.png" crossorigin="anonymous"></div>
 
       <div class="paper-strip" id="paperStrip">
         <div class="paper-text" id="paperText">
@@ -235,17 +230,51 @@
       }, 850);
     }
 
+    // --- 修復後的截圖函數 ---
     function saveImage() {
-      if (!box.classList.contains('open')) return;
+      if (!box.classList.contains('open')) {
+        alert("Please crack the cookie first!");
+        return;
+      }
+      
       const area = document.getElementById('capture-area');
+      const btn = event.currentTarget;
+      btn.textContent = "GENERATING...";
+      
+      // 1. 手機端截圖前暫時關閉 transform 縮放，避免 html2canvas 偏移
       const originalTransform = area.style.transform;
       area.style.transform = "none";
-      html2canvas(area, { backgroundColor: '#050505', scale: 3 }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = `fortune-${Date.now()}.png`;
-        link.href = canvas.toDataURL();
-        link.click();
+
+      html2canvas(area, {
+        backgroundColor: '#050505',
+        scale: window.devicePixelRatio || 2, // 根據設備像素比自動縮放，保證清晰度
+        useCORS: true,      // 允許跨域圖片
+        allowTaint: false,  // 防止污染畫布
+        logging: false
+      }).then(canvas => {
+        try {
+          const imgData = canvas.toDataURL("image/png");
+          const link = document.createElement('a');
+          link.download = `fortune-${Date.now()}.png`;
+          link.href = imgData;
+          
+          // 針對 iOS/Android 兼容處理
+          if (navigator.userAgent.match(/(iPhone|iPod|iPad|Android)/i)) {
+            // 手機端若無法自動下載，則打開新分頁顯示圖片，提示用戶長按儲存
+            const newWindow = window.open();
+            newWindow.document.write(`<img src="${imgData}" style="width:100%;" />`);
+            newWindow.document.title = "Long press to save your fortune";
+          } else {
+            link.click();
+          }
+        } catch (err) {
+          console.error("Capture failed:", err);
+          alert("Capture failed. Please take a screenshot manually.");
+        }
+        
+        // 恢復原始狀態
         area.style.transform = originalTransform;
+        btn.textContent = "SHARE WISDOM";
       });
     }
 
