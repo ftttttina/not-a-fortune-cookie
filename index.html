@@ -21,48 +21,60 @@
       overflow: hidden; position: relative;
     }
 
-    /* --- [修正] 包裝層樣式：確保拆開後不擋路 --- */
+    /* --- [優化] 回歸透明質感的包裝層 --- */
     .package-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      /* 改回極淡色調，增加透明感 */
+      background: rgba(255, 255, 255, 0.02); 
+      /* 強大的磨砂玻璃效果 */
+      backdrop-filter: blur(25px) saturate(150%); 
+      -webkit-backdrop-filter: blur(25px) saturate(150%);
       z-index: 9999; cursor: pointer;
       display: flex; justify-content: center; align-items: center;
       transition: transform 1.2s cubic-bezier(0.8, 0, 0.2, 1), opacity 1s ease, visibility 1.2s;
     }
 
+    /* 增強反光層質感 */
     .plastic-shine {
       position: absolute; width: 200%; height: 200%;
-      background: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.05) 50%, transparent 55%);
-      animation: shine 5s infinite linear;
+      background: linear-gradient(135deg, 
+        transparent 40%, 
+        rgba(255,255,255,0.08) 50%, 
+        transparent 60%
+      );
+      animation: shine 6s infinite ease-in-out;
+      pointer-events: none;
     }
 
     .package-text {
-      font-size: 10px; letter-spacing: 10px; color: #666; 
+      font-size: 10px; letter-spacing: 12px; color: rgba(255,255,255,0.4); 
       text-transform: uppercase; z-index: 10000; font-weight: 300;
+      text-shadow: 0 0 10px rgba(255,255,255,0.2);
     }
 
     .package-overlay.unwrapped {
-      transform: translateY(-100%) skewY(5deg);
+      transform: translateY(-100%);
       opacity: 0; visibility: hidden;
     }
 
     @keyframes shine {
       0% { transform: translate(-30%, -30%); }
-      100% { transform: translate(30%, 30%); }
+      50% { transform: translate(10%, 10%); }
+      100% { transform: translate(-30%, -30%); }
     }
 
-    /* --- [修正] 內容層：拆封前鎖定點擊，拆封後解鎖 --- */
+    /* --- 內容層：初始隱影 --- */
     #capture-area, .ui-layer {
       transition: filter 1s ease, opacity 1s ease;
-      filter: blur(15px); opacity: 0.1;
-      pointer-events: none; /* 關鍵：未拆封前無法點擊 */
+      filter: blur(5px); /* 初始稍微模糊 */
+      opacity: 0.8;
+      pointer-events: none;
     }
 
     body.ready #capture-area, body.ready .ui-layer {
       filter: blur(0) !important; 
       opacity: 1 !important;
-      pointer-events: auto; /* 關鍵：拆封後解鎖所有互動 */
+      pointer-events: auto;
     }
 
     /* --- 餅乾與 UI 樣式 --- */
@@ -159,7 +171,6 @@
 
     fetch(GITHUB_JSON_URL).then(res => res.json()).then(data => { fortunesData = data; });
 
-    // 修正後的拆包裝邏輯
     function unwrapCookie() {
       if (isUnwrapped) return;
       isUnwrapped = true;
@@ -168,14 +179,12 @@
       overlay.classList.add('unwrapped');
       document.body.classList.add('ready');
 
-      // 動畫結束後徹底移除元素，避免擋住點擊
       setTimeout(() => {
         overlay.style.display = 'none';
       }, 1200);
     }
 
     box.addEventListener('click', () => {
-      // 確保包裝拆開後才能點擊餅乾
       if (!isUnwrapped || isLocked || !fortunesData || box.classList.contains('open')) return;
       isLocked = true;
 
