@@ -107,9 +107,39 @@
     .cookie-box.open .right-part { transform: translate(145px, -35px) rotate(32deg); clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%); }
 
     /* 紙條 (90% 大小 & 加入垂直折痕) */
-    .paper-strip { 
-      position: absolute; top: 50%; left: 50%; width: 0; height: 80px; 
-      background: var(--paper-color); 
+  .paper-strip { 
+  position: absolute; 
+  top: 50%; 
+  left: 50%; 
+  width: 0; 
+  height: 80px; 
+  /* 改為淺灰色，並增加一點焦糊感 */
+  background: #c0c0c0; 
+  background-image: 
+    linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.15) 50%, transparent 52%), 
+    repeating-linear-gradient(rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 15px); 
+    
+  transform: translate(-50%, -50%); 
+  z-index: 2; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+  
+  /* 增加邊緣焦化陰影與燒灼感 */
+  box-shadow: 
+    inset 0 0 15px rgba(0,0,0,0.2),
+    0 0 10px rgba(0,0,0,0.3); 
+    
+  /* 讓邊緣更不規則，像手撕或燒過的 */
+  clip-path: polygon(1% 4%, 98.5% 2%, 99.5% 96%, 1.5% 98%); 
+  overflow: hidden; 
+  visibility: hidden; 
+}
+
+/* 文字顏色微調，確保在灰紙上依舊清晰 */
+#enText { font-size: 11.2px; font-style: italic; font-weight: bold; margin-bottom: 4px; color: #111; letter-spacing: 0.1px; }
+#zhText { font-size: 8.1px; font-weight: 500; color: #333; letter-spacing: 1px; opacity: 0.9; }
       background-image: 
         linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.08) 50%, transparent 52%), 
         repeating-linear-gradient(rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 18px); 
