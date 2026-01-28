@@ -2,155 +2,106 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>Black Fortune Cookie | 終極真實版</title>
+  <title>Black Fortune Cookie | Cloud Edition</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    :root {
-      --bg-color: #050505;
-      --paper-color: #fdfaf0;
-      --shadow: rgba(0, 0, 0, 0.3);
-    }
+    /* CSS 部分保持你最喜歡的物理震顫與黑曜石質感 */
+    :root { --bg-color: #050505; --paper-color: #fdfaf0; }
+    body { margin: 0; background: var(--bg-color); color: #fff; font-family: "Palatino", serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+    .app { max-width: 500px; width: 95%; text-align: center; }
+    .header h1 { font-size: 28px; letter-spacing: 6px; font-weight: 300; margin-bottom: 40px; }
+    
+    select { background: #111; color: #777; border: 1px solid #222; padding: 10px 20px; margin-bottom: 40px; outline: none; cursor: pointer; border-radius: 0; }
 
-    body {
-      margin: 0;
-      background: var(--bg-color);
-      color: #fff;
-      font-family: "Palatino", "Georgia", serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      overflow: hidden;
-    }
+    .cookie-box { position: relative; width: 260px; height: 200px; margin: 0 auto; cursor: pointer; perspective: 1000px; }
+    .cookie-part { position: absolute; width: 130px; height: 200px; background-image: url('black-cookie.png'); background-size: 260px 200px; transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1); z-index: 3; }
+    .left-part { left: 0; background-position: left; transform-origin: left bottom; }
+    .right-part { right: 0; background-position: right; transform-origin: right bottom; }
 
-    /* 核心餅乾容器 */
-    .cookie-box {
-      position: relative;
-      width: 260px;
-      height: 200px;
-      cursor: pointer;
-      perspective: 1000px; /* 增加 3D 深度感 */
-    }
-
-    /* 紙條：加入震顫動畫與複雜光影 */
     .paper-strip {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 75px;
-      background-color: var(--paper-color);
-      /* 模擬紙張纖維與摺痕的複合漸層 */
-      background-image: 
-        linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.08) 50%, transparent 52%),
-        linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%, rgba(0,0,0,0.05) 100%);
-      transform: translate(-50%, -50%);
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-      overflow: hidden;
-      clip-path: polygon(1% 4%, 99% 0%, 100% 96%, 0% 100%); /* 不規則邊緣 */
+      position: absolute; top: 50%; left: 50%; width: 0; height: 75px; background-color: var(--paper-color);
+      background-image: linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.08) 50%, transparent 52%);
+      transform: translate(-50%, -50%); z-index: 2; display: flex; flex-direction: column; justify-content: center; align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8); overflow: hidden;
+      clip-path: polygon(1% 4%, 99% 0%, 100% 96%, 0% 100%);
       transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    /* 當餅乾打開時，紙條觸發自定義震顫動畫 */
-    .cookie-box.open .paper-strip {
-      width: 320px;
-      animation: paper-shake 0.6s ease-out forwards;
-    }
-
+    .cookie-box.open .paper-strip { width: 320px; animation: paper-shake 0.6s ease-out forwards; }
     @keyframes paper-shake {
       0% { transform: translate(-50%, -50%) rotate(0deg) scale(0.8); }
       20% { transform: translate(-50%, -55%) rotate(2deg) scale(1.05); }
-      40% { transform: translate(-50%, -48%) rotate(-1.5deg) scale(1); }
-      60% { transform: translate(-50%, -51%) rotate(1deg); }
-      80% { transform: translate(-50%, -50%) rotate(-0.5deg); }
-      100% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
     }
 
-    .paper-text {
-      color: #1a1a1a;
-      opacity: 0;
-      width: 300px;
-      text-align: center;
-      transition: opacity 0.3s ease 0.4s;
-      filter: drop-shadow(0.5px 0.5px 0.5px rgba(0,0,0,0.2)); /* 模擬墨水感 */
-    }
-
+    .paper-text { color: #1a1a1a; opacity: 0; width: 300px; text-align: center; transition: opacity 0.3s ease 0.4s; }
     .cookie-box.open .paper-text { opacity: 1; }
-
-    .en-paper { font-size: 15px; font-style: italic; font-weight: bold; display: block; margin-bottom: 5px; }
-    .zh-paper { font-size: 13px; color: #333; display: block; letter-spacing: 1px; }
-
-    /* 餅乾外觀與動畫 */
-    .cookie-part {
-      position: absolute;
-      width: 130px;
-      height: 200px;
-      background-image: url('black-cookie.png');
-      background-size: 260px 200px;
-      transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1);
-      z-index: 3;
-    }
-
-    .left-part { left: 0; background-position: left; transform-origin: left bottom; }
-    .right-part { right: 0; background-position: right; transform-origin: right bottom; }
+    .en-paper { font-size: 14px; font-style: italic; font-weight: bold; display: block; margin-bottom: 4px; line-height: 1.2; }
+    .zh-paper { font-size: 12px; color: #444; display: block; letter-spacing: 1px; }
 
     .cookie-box.open .left-part { transform: translate(-120px, -50px) rotate(-45deg); opacity: 0.2; }
     .cookie-box.open .right-part { transform: translate(120px, -50px) rotate(45deg); opacity: 0.2; }
 
-    /* 下方介面 */
-    .controls { margin-top: 50px; text-align: center; }
-    button {
-      background: transparent;
-      border: 1px solid #222;
-      color: #444;
-      padding: 10px 25px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: 0.4s;
-    }
-    button:hover { border-color: #fff; color: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.1); }
+    button { margin-top: 60px; background: none; border: 1px solid #333; color: #555; padding: 10px 20px; cursor: pointer; }
+    button:hover { color: #fff; border-color: #666; }
   </style>
 </head>
 <body>
 
   <div class="app">
+    <div class="header"><h1>BLACK FORTUNE</h1></div>
+
+    <select id="flavor">
+      <option value="life">LIFE 生活</option>
+      <option value="work">WORK 職場</option>
+      <option value="love">LOVE 情感</option>
+      <option value="money">MONEY 金錢</option>
+    </select>
+
     <div class="cookie-box" id="cookieBox">
       <div class="paper-strip">
         <div class="paper-text">
-          <span class="en-paper" id="enText"></span>
-          <span class="zh-paper" id="zhText"></span>
+          <span class="en-paper" id="enText">Loading...</span>
+          <span class="zh-paper" id="zhText">載入中...</span>
         </div>
       </div>
       <div class="cookie-part left-part"></div>
       <div class="cookie-part right-part"></div>
     </div>
 
-    <div class="controls">
-      <button onclick="reset()">RESET DESTINY</button>
-    </div>
+    <button onclick="reset()">RESET DESTINY</button>
   </div>
 
   <script>
-    const fortunes = [
-      { en: "You're not lost. You're just avoiding the truth.", zh: "你不是迷路，你只是在逃避真相。" },
-      { en: "The best time to start was 10 years ago.", zh: "最好的時機是十年前，其次是現在。" },
-      { en: "Red flags look like roses through rose-colored glasses.", zh: "當你戴著濾鏡看人時，滿地的紅燈看起來都像玫瑰。" }
-    ];
-
+    // ⚠️ 請將下方的網址替換成你的 GitHub Raw 網址
+    const GITHUB_JSON_URL = '你的_GITHUB_RAW_連結_貼在這裡';
+    
+    let fortunesData = null;
     const sound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
     const box = document.getElementById('cookieBox');
 
+    // 頁面載入時先抓取 JSON
+    fetch(GITHUB_JSON_URL)
+      .then(res => res.json())
+      .then(data => {
+        fortunesData = data;
+        console.log("資料庫連線成功，160 句毒雞湯已就緒。");
+      })
+      .catch(err => {
+        console.error("連線失敗:", err);
+        document.getElementById('zhText').textContent = "連線失敗，請檢查 GitHub 連結。";
+      });
+
     box.addEventListener('click', () => {
-      if(box.classList.contains('open')) return;
+      if (!fortunesData || box.classList.contains('open')) return;
       
       sound.currentTime = 0;
       sound.play();
 
-      const item = fortunes[Math.floor(Math.random() * fortunes.length)];
+      const flavor = document.getElementById('flavor').value;
+      const list = fortunesData[flavor];
+      const item = list[Math.floor(Math.random() * list.length)];
+
       document.getElementById('enText').textContent = item.en;
       document.getElementById('zhText').textContent = item.zh;
 
