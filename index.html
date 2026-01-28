@@ -6,16 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root {
-      --bg-color: #0f0f0f;
-      --cookie-color: #222;
-      --accent-color: #fff;
+      --bg-color: #0a0a0a;
+      --text-color: #ffffff;
+      --accent-color: #555;
     }
 
     body {
       margin: 0;
       background: var(--bg-color);
-      color: var(--accent-color);
-      font-family: system-ui, -apple-system, sans-serif;
+      color: var(--text-color);
+      font-family: "Times New Roman", "華康明體", serif;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -24,232 +24,196 @@
     }
 
     .app {
-      max-width: 420px;
+      max-width: 450px;
       width: 90%;
       text-align: center;
     }
 
-    h1 {
-      font-weight: 300;
-      letter-spacing: 2px;
-      margin-bottom: 30px;
-      opacity: 0.8;
-    }
+    .header h1 { font-size: 28px; letter-spacing: 6px; margin-bottom: 5px; font-weight: 300; }
+    .header p { font-size: 11px; color: var(--accent-color); margin-top: 0; margin-bottom: 40px; letter-spacing: 2px; }
 
     select {
-      background: #1a1a1a;
-      color: #fff;
-      border: 1px solid #333;
+      background: #111;
+      color: #999;
+      border: 1px solid #222;
       padding: 10px;
-      border-radius: 6px;
-      width: 100%;
+      width: 200px;
       margin-bottom: 40px;
+      cursor: pointer;
       outline: none;
+      appearance: none; /* 移除預設樣式 */
+      text-align: center;
     }
 
     /* 餅乾容器 */
-    .cookie-wrapper {
+    .cookie-box {
       position: relative;
-      width: 200px;
-      height: 150px;
+      width: 260px;
+      height: 200px;
       margin: 0 auto;
       cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
 
-    /* 餅乾兩半的共通樣式 */
-    .cookie-half {
+    /* 左右兩片餅乾的核心邏輯 */
+    .cookie-part {
       position: absolute;
-      width: 100px;
-      height: 120px;
-      background: radial-gradient(circle at center, #444 0%, #000 100%);
-      border: 1px solid #333;
-      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      width: 130px; /* 容器總寬度的一半 */
+      height: 200px;
+      background-image: url('black-cookie.png'); /* 讀取你的圖片 */
+      background-size: 260px 200px; /* 背景寬度要是容器的兩倍 */
+      background-repeat: no-repeat;
+      transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 2;
     }
 
-    .left {
-      left: 10px;
-      border-radius: 100px 20px 20px 100px;
-      transform-origin: left bottom;
+    .left-part {
+      left: 0;
+      background-position: left center; /* 只顯示圖片左半部 */
     }
 
-    .right {
-      right: 10px;
-      border-radius: 20px 100px 100px 20px;
-      transform-origin: right bottom;
+    .right-part {
+      right: 0;
+      background-position: right center; /* 只顯示圖片右半部 */
     }
 
-    /* 紙條樣式 */
-    .paper {
+    /* 裂開動畫 */
+    .cookie-box.open .left-part {
+      transform: translate(-90px, -30px) rotate(-40deg);
+      opacity: 0.2;
+      filter: blur(2px);
+    }
+
+    .cookie-box.open .right-part {
+      transform: translate(90px, -30px) rotate(40deg);
+      opacity: 0.2;
+      filter: blur(2px);
+    }
+
+    /* 紙條動畫 */
+    .paper-strip {
       position: absolute;
-      width: 140px;
-      background: #fff;
+      top: 45%;
+      left: 50%;
+      width: 0;
+      height: 45px;
+      background: #ffffff;
       color: #000;
-      padding: 5px 10px;
-      font-size: 14px;
-      font-weight: bold;
-      transform: scaleX(0);
-      transition: all 0.4s ease;
+      transform: translate(-50%, -50%);
+      overflow: hidden;
+      transition: width 0.6s ease 0.1s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       z-index: 1;
-      white-space: nowrap;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 20px rgba(255,255,255,0.1);
     }
 
-    /* 動畫狀態 */
-    .cookie-wrapper.open .left {
-      transform: rotate(-45deg) translate(-50px, -20px);
-      opacity: 0.5;
+    .cookie-box.open .paper-strip {
+      width: 240px;
     }
 
-    .cookie-wrapper.open .right {
-      transform: rotate(45deg) translate(50px, -20px);
-      opacity: 0.5;
-    }
-
-    .cookie-wrapper.open .paper {
-      transform: scaleX(1);
-    }
-
-    /* 下方籤文顯示 */
-    .fortune-display {
+    /* 籤文顯示區域 */
+    .fortune-content {
       margin-top: 50px;
-      min-height: 60px;
-      font-size: 1.1rem;
-      line-height: 1.6;
-      font-weight: 300;
-      color: #ccc;
-      transition: opacity 0.5s ease;
+      min-height: 100px;
       opacity: 0;
+      transition: opacity 0.8s ease 0.4s;
     }
 
-    .fortune-display.show {
-      opacity: 1;
-    }
+    .fortune-content.show { opacity: 1; }
+
+    .en-text { font-style: italic; font-size: 18px; margin-bottom: 10px; display: block; color: #fff; }
+    .zh-text { font-size: 15px; color: #888; letter-spacing: 1px; display: block; }
 
     button {
       margin-top: 30px;
       background: none;
-      border: 1px solid #444;
-      color: #888;
-      padding: 10px 20px;
-      border-radius: 20px;
+      border: 1px solid #333;
+      color: #555;
+      padding: 8px 16px;
       cursor: pointer;
-      transition: 0.3s;
-    }
-
-    button:hover {
-      border-color: #fff;
-      color: #fff;
-    }
-
-    footer {
-      position: fixed;
-      bottom: 20px;
-      font-size: 10px;
-      color: #444;
+      font-size: 11px;
       letter-spacing: 1px;
     }
+
+    button:hover { color: #eee; border-color: #666; }
   </style>
 </head>
 <body>
 
   <div class="app">
-    <h1>BLACK FORTUNE</h1>
-
-    <select id="flavor">
-      <option value="life">生活真相 (Life)</option>
-      <option value="work">職場現實 (Work)</option>
-      <option value="love">情感幻覺 (Love)</option>
-      <option value="money">金錢貧瘠 (Money)</option>
-    </select>
-
-    <div class="cookie-wrapper" id="cookieWrapper">
-      <div class="cookie-half left"></div>
-      <div class="paper">真相在此</div>
-      <div class="cookie-half right"></div>
+    <div class="header">
+      <h1>BLACK FORTUNE</h1>
+      <p>BILINGUAL CRUELTY / 雙語真相</p>
     </div>
 
-    <div class="fortune-display" id="fortuneText"></div>
+    <select id="flavor">
+      <option value="life">LIFE / 生活</option>
+      <option value="work">WORK / 職場</option>
+      <option value="love">LOVE / 情感</option>
+    </select>
 
-    <button onclick="resetCookie()">重置餅乾</button>
+    <div class="cookie-box" id="cookieBox">
+      <div class="paper-strip">
+        <span style="font-size: 10px; color: #999; letter-spacing: 2px;">THE TRUTH</span>
+      </div>
+      <div class="cookie-part left-part"></div>
+      <div class="cookie-part right-part"></div>
+    </div>
+
+    <div class="fortune-content" id="fortuneDisplay">
+      <span class="en-text" id="enText"></span>
+      <span class="zh-text" id="zhText"></span>
+    </div>
+
+    <button onclick="reset()">RETRY DESTINY</button>
   </div>
-
-  <footer>NOT MOTIVATIONAL. JUST HONEST.</footer>
 
   <script>
     const fortunes = {
       life: [
-        "你並不特別，你只是統計學上的平均值。",
-        "舒適圈是你夢想火化的地方。",
-        "你不是討厭生活，你只是在逃避思考。",
-        "你的潛力很驚人，可惜你幾乎沒用過。",
-        "問題不在運氣，在於你的決定。",
-        "你一直在等動力，它也一直在等你動。"
+        { en: "You're not lost. You're just avoiding the truth.", zh: "你不是迷路，你只是在逃避真相。" },
+        { en: "Your potential is a ceiling you'll never touch.", zh: "你的潛力是你永遠觸碰不到的天花板。" },
+        { en: "Tomorrow is just today's mistakes repeated.", zh: "明天不過是今天的錯誤循環。" }
       ],
       work: [
-        "你的公司並不在乎你的心理健康。",
-        "你是可以被取代的，公司沒你活得更好。",
-        "努力工作治不好糟糕的管理層。",
-        "你不是薪水太低，是太過忠誠。",
-        "老闆沒被你感動，他只是很忙。",
-        "夢想的工作，本質還是工作。"
+        { en: "The company's success is not your success.", zh: "公司的成功，並不是你的成功。" },
+        { en: "You are one 'restructuring' away from being forgotten.", zh: "你離被遺忘只隔了一次「組織重整」。" },
+        { en: "Your passion is being sold for someone else's yacht.", zh: "你的熱情正在被販賣，換成別人的遊艇。" }
       ],
       love: [
-        "你不是心碎，你只是對幻想產生了戒斷反應。",
-        "他們沒變，是你一直無視那些紅燈。",
-        "愛情沒失敗，是你過高的期望失敗了。",
-        "你是感到寂寞，而不是愛。",
-        "你懷念的是那段時光，不是那個人。",
-        "化學反應不代表你們真的合得來。"
-      ],
-      money: [
-        "你的銀行存款反映了你的優先順序。",
-        "你不是窮，你是無法對慾望說不。",
-        "你無法靠著自我暗示走出財務危機。",
-        "你的生活方式比你的收入還響亮。",
-        "你不需要更多錢，你需要更少的藉口。"
+        { en: "They missed you until they found someone else.", zh: "他們一直很想你，直到找到了別人。" },
+        { en: "Attachment is not love. Loneliness is not a reason.", zh: "依賴不是愛，寂寞也不是理由。" },
+        { en: "Red flags look like roses when you're desperate.", zh: "當你渴望愛時，危險信號看起來都像玫瑰。" }
       ]
     };
 
-    // 準備音效
-    const crackSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
-    crackSound.volume = 0.6;
+    const sound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+    const box = document.getElementById('cookieBox');
+    const display = document.getElementById('fortuneDisplay');
 
-    const wrapper = document.getElementById('cookieWrapper');
-    const fortuneText = document.getElementById('fortuneText');
-    const flavorSelect = document.getElementById('flavor');
-
-    function crackCookie() {
-      if (wrapper.classList.contains('open')) return;
-
-      // 播放碎裂聲
-      crackSound.currentTime = 0;
-      crackSound.play();
-
-      // 觸發動畫
-      wrapper.classList.add('open');
-
-      // 隨機選取籤文
-      const flavor = flavorSelect.value;
+    box.addEventListener('click', () => {
+      if(box.classList.contains('open')) return;
+      
+      sound.currentTime = 0;
+      sound.play();
+      box.classList.add('open');
+      
+      const flavor = document.getElementById('flavor').value;
       const list = fortunes[flavor];
-      const random = list[Math.floor(Math.random() * list.length)];
+      const item = list[Math.floor(Math.random() * list.length)];
 
-      // 延遲顯示文字，讓動畫跑完
       setTimeout(() => {
-        fortuneText.textContent = random;
-        fortuneText.classList.add('show');
-      }, 400);
-    }
+        document.getElementById('enText').textContent = item.en;
+        document.getElementById('zhText').textContent = item.zh;
+        display.classList.add('show');
+      }, 500);
+    });
 
-    function resetCookie() {
-      wrapper.classList.remove('open');
-      fortuneText.classList.remove('show');
+    function reset() {
+      box.classList.remove('open');
+      display.classList.remove('show');
     }
-
-    wrapper.addEventListener('click', crackCookie);
   </script>
 </body>
 </html>
