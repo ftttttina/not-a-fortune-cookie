@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>Black Fortune | Pro Edition</title>
+  <title>Black Fortune | Ultimate Edition</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
@@ -13,20 +13,25 @@
 
     body {
       margin: 0; background: var(--bg-color); color: #fff;
-      font-family: "Palatino", serif; display: flex; flex-direction: column;
+      font-family: "Palatino", "Georgia", serif; 
+      display: flex; flex-direction: column;
       justify-content: center; align-items: center; min-height: 100vh; overflow: hidden;
     }
 
-    /* 截圖範圍容器 */
+    /* 截圖目標區域 */
     #capture-area {
-      padding: 40px;
+      padding: 50px;
       display: flex;
       flex-direction: column;
       align-items: center;
       background: var(--bg-color);
+      border-radius: 20px;
     }
 
-    .header h1 { font-size: 24px; letter-spacing: 8px; font-weight: 300; margin-bottom: 30px; opacity: 0.6; }
+    .header h1 { 
+      font-size: 24px; letter-spacing: 8px; font-weight: 300; 
+      margin-bottom: 40px; opacity: 0.6; text-transform: uppercase;
+    }
 
     /* 餅乾容器 */
     .cookie-box {
@@ -37,80 +42,94 @@
       perspective: 1200px;
     }
 
-    /* 增加質感層次 */
+    /* 餅乾本體：增加立體感濾鏡 */
     .cookie-part {
       position: absolute;
-      width: 50%; height: 100%;
+      width: 50.5%; /* 稍微多出 0.5% 以消除中間縫隙 */
+      height: 100%;
       overflow: hidden;
-      transition: all 0.9s cubic-bezier(0.5, 0, 0.2, 1); /* 調整回彈感 */
+      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 3;
-      /* 提升立體感：讓 PNG 邊緣有光影感 */
-      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)) brightness(1.1);
+      filter: drop-shadow(0 10px 25px rgba(0,0,0,0.9)) brightness(1.1);
     }
 
     .cookie-part img {
       position: absolute;
       width: 200%; height: 100%;
       object-fit: contain;
+      pointer-events: none;
     }
 
-    /* 鋸齒切口 */
+    /* 左半邊與不規則切口 */
     .left-part { 
       left: 0; transform-origin: left bottom;
-      clip-path: polygon(0% 0%, 100% 0%, 90% 20%, 100% 40%, 85% 60%, 100% 80%, 95% 100%, 0% 100%);
+      clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%);
     }
     .left-part img { left: 0; }
 
+    /* 右半邊與不規則切口 */
     .right-part { 
       right: 0; transform-origin: right bottom;
-      clip-path: polygon(10% 20%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 5% 80%, 15% 60%, 0% 40%);
+      clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%);
     }
     .right-part img { right: 0; }
 
-    /* 紙條樣式 */
+    /* 紙條動畫與樣式 */
     .paper-strip {
       position: absolute; top: 50%; left: 50%; width: 0; height: 60px;
       background: var(--paper-color);
       transform: translate(-50%, -50%);
       z-index: 2; display: flex; justify-content: center; align-items: center;
-      /* 紙條收回的動畫延遲 */
       transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
-      clip-path: polygon(2% 5%, 98% 2%, 97% 95%, 3% 98%);
+      box-shadow: inset 0 0 12px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.5);
+      clip-path: polygon(1% 4%, 99% 1%, 98% 96%, 2% 99%);
+      overflow: hidden;
     }
 
-    .cookie-box.open .paper-strip { width: 260px; }
+    .cookie-box.open .paper-strip { width: 250px; }
     
     .paper-text { 
-      color: #1a1a1a; opacity: 0; font-size: 13px; text-align: center; width: 240px;
+      color: #1a1a1a; opacity: 0; font-size: 13px; text-align: center; width: 230px;
       transition: opacity 0.3s;
     }
     .cookie-box.open .paper-text { opacity: 1; transition-delay: 0.5s; }
 
-    /* 掰開後的動作 */
-    .cookie-box.open .left-part { transform: translate(-140px, -40px) rotate(-35deg); }
-    .cookie-box.open .right-part { transform: translate(140px, -40px) rotate(35deg); }
+    .en-paper { font-style: italic; font-weight: bold; display: block; margin-bottom: 2px; line-height: 1.1; }
+    .zh-paper { font-size: 11px; color: #444; display: block; }
 
-    /* 選單與按鈕 */
-    .controls { margin-top: 40px; display: flex; gap: 15px; }
+    /* 開啟時的位移 */
+    .cookie-box.open .left-part { transform: translate(-140px, -50px) rotate(-35deg); opacity: 0.4; }
+    .cookie-box.open .right-part { transform: translate(140px, -50px) rotate(35deg); opacity: 0.4; }
+
+    /* 控制介面 */
+    .ui-layer { margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+    .controls { display: flex; gap: 12px; }
+
     select, button {
-      background: #111; color: #888; border: 1px solid #222;
-      padding: 8px 15px; cursor: pointer; transition: 0.3s;
+      background: #111; color: #777; border: 1px solid #222;
+      padding: 10px 18px; cursor: pointer; border-radius: 4px; transition: 0.3s;
+      font-size: 12px; letter-spacing: 1px;
     }
-    button:hover { color: #fff; border-color: #555; }
-    .share-btn { color: #fdfaf0; border-color: #444; }
+    button:hover { color: #fff; border-color: #555; background: #1a1a1a; }
+    .share-btn { border-color: #333; color: #aaa; }
+
+    /* 碎屑噴發 */
+    .particle {
+      position: absolute; top: 50%; left: 50%; width: 4px; height: 4px;
+      background: #333; border-radius: 1px; pointer-events: none; z-index: 4;
+    }
   </style>
 </head>
 <body>
 
   <div id="capture-area">
-    <div class="header"><h1>BLACK FORTUNE</h1></div>
+    <div class="header"><h1>Black Fortune</h1></div>
     
     <div class="cookie-box" id="cookieBox">
       <div class="paper-strip" id="paperStrip">
-        <div class="paper-text">
-          <div id="enText" style="font-style: italic; font-weight: bold; margin-bottom: 2px;"></div>
-          <div id="zhText"></div>
+        <div class="paper-text" id="paperText">
+          <span class="en-paper" id="enText"></span>
+          <span class="zh-paper" id="zhText"></span>
         </div>
       </div>
       <div class="cookie-part left-part"><img src="black-cookie.png"></div>
@@ -118,27 +137,44 @@
     </div>
   </div>
 
-  <div class="controls">
-    <select id="flavor">
-      <option value="life">LIFE 生活</option>
-      <option value="work">WORK 職場</option>
-      <option value="love">LOVE 情感</option>
-      <option value="money">MONEY 金錢</option>
-    </select>
-    <button onclick="resetCookie()">RESET</button>
-    <button class="share-btn" onclick="shareAsImage()">SHARE IMAGE</button>
+  <div class="ui-layer">
+    <div class="controls">
+      <select id="flavor">
+        <option value="life">LIFE 生活</option>
+        <option value="work">WORK 職場</option>
+        <option value="love">LOVE 情感</option>
+        <option value="money">MONEY 金錢</option>
+      </select>
+      <button onclick="resetCookie()">RESET</button>
+      <button class="share-btn" onclick="saveImage()">SHARE</button>
+    </div>
   </div>
 
   <script>
     const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/ftttttina/not-a-fortune-cookie/refs/heads/main/fortunes.json';
     let fortunesData = null;
     const box = document.getElementById('cookieBox');
+    const paper = document.getElementById('paperStrip');
+    const text = document.getElementById('paperText');
+    
+    // 初始化音效
+    const crackSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
 
-    fetch(GITHUB_JSON_URL).then(res => res.json()).then(data => { fortunesData = data; });
+    // 抓取 JSON
+    fetch(GITHUB_JSON_URL)
+      .then(res => res.json())
+      .then(data => { fortunesData = data; console.log("Connected to dark wisdom."); })
+      .catch(err => { document.getElementById('zhText').textContent = "連線失敗"; });
 
+    // 點擊掰開
     box.addEventListener('click', () => {
       if (!fortunesData || box.classList.contains('open')) return;
       
+      // 播放聲音
+      crackSound.currentTime = 0;
+      crackSound.play().catch(e => console.warn("Audio blocked by browser. Click again."));
+
+      // 抽籤
       const flavor = document.getElementById('flavor').value;
       const list = fortunesData[flavor];
       const item = list[Math.floor(Math.random() * list.length)];
@@ -146,34 +182,53 @@
       document.getElementById('enText').textContent = item.en;
       document.getElementById('zhText').textContent = item.zh;
 
+      // 動畫
       box.classList.add('open');
+      createParticles(30);
     });
 
-    // 進階 Reset：先縮紙條，再合餅乾
-    function resetCookie() {
-      const paper = document.getElementById('paperStrip');
-      const text = document.querySelector('.paper-text');
+    // 碎屑邏輯
+    function createParticles(count) {
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.classList.add('particle');
+        box.appendChild(p);
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 70 + Math.random() * 150;
+        const tx = Math.cos(angle) * velocity;
+        const ty = Math.sin(angle) * velocity;
+        p.animate([
+          { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+          { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) rotate(${Math.random()*360}deg) scale(0)`, opacity: 0 }
+        ], { duration: 800, easing: 'cubic-bezier(0, .9, .57, 1)', fill: 'forwards' });
+        setTimeout(() => p.remove(), 1000);
+      }
+    }
 
-      // 1. 先隱藏文字並縮回紙條
+    // 重置邏輯 (B 方案：紙條先縮回)
+    function resetCookie() {
+      if (!box.classList.contains('open')) return;
+      
+      // 1. 先隱藏文字與縮回紙條
+      text.style.transition = 'opacity 0.2s';
       text.style.opacity = '0';
       paper.style.width = '0';
 
-      // 2. 延遲 400ms 後再把餅乾合起來
+      // 2. 延遲 400ms 餅乾合攏
       setTimeout(() => {
         box.classList.remove('open');
+        // 重置文字 transition 屬性供下次使用
+        setTimeout(() => { text.style.transition = 'opacity 0.3s'; }, 800);
       }, 400);
     }
 
-    // 截圖分享功能
-    function shareAsImage() {
+    // 截圖分享 (C 方案)
+    function saveImage() {
       const area = document.getElementById('capture-area');
-      html2canvas(area, {
-        backgroundColor: '#050505',
-        scale: 2 // 提升截圖清晰度
-      }).then(canvas => {
+      html2canvas(area, { backgroundColor: '#050505', scale: 2 }).then(canvas => {
         const link = document.createElement('a');
-        link.download = 'my-black-fortune.png';
-        link.href = canvas.toDataURL('image/png');
+        link.download = 'black-fortune.png';
+        link.href = canvas.toDataURL();
         link.click();
       });
     }
