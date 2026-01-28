@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>Black Fortune | Fix Edition</title>
+  <title>Black Fortune | Bug Fixed</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
@@ -63,13 +63,11 @@
     .right-part { right: 0; transform-origin: right bottom; }
     .right-part img { right: 0; object-position: right center; }
 
-    /* Open 狀態切換 */
     .cookie-box.open .full-cookie { opacity: 0; pointer-events: none; }
     .cookie-box.open .cookie-part { opacity: 0.35; filter: blur(0.3px); }
     .cookie-box.open .left-part { transform: translate(-150px, -40px) rotate(-35deg); clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%); }
     .cookie-box.open .right-part { transform: translate(150px, -40px) rotate(35deg); clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%); }
 
-    /* 紙條 - 增加更嚴格的隱藏邏輯 */
     .paper-strip {
       position: absolute; top: 50%; left: 50%; width: 0; height: 75px;
       background: var(--paper-color); transform: translate(-50%, -50%);
@@ -78,7 +76,7 @@
       box-shadow: 0 0 15px rgba(0,0,0,0.2);
       clip-path: polygon(1% 4%, 99% 1%, 98% 96%, 2% 99%);
       overflow: hidden;
-      visibility: hidden; /* 關鍵：平時完全不可見 */
+      visibility: hidden;
     }
     .cookie-box.open .paper-strip { width: 280px; visibility: visible; }
 
@@ -150,11 +148,15 @@
     const text = document.getElementById('paperText');
     const crackSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
 
-    fetch(GITHUB_JSON_URL).then(res => res.json()).then(data => { fortunesData = data; });
+    fetch(GITHUB_JSON_URL)
+      .then(res => res.json())
+      .then(data => { fortunesData = data; })
+      .catch(() => {});
 
     box.addEventListener('click', () => {
       if (isLocked || !fortunesData || box.classList.contains('open')) return;
       isLocked = true;
+
       crackSound.currentTime = 0;
       crackSound.play().catch(() => {});
 
@@ -167,37 +169,47 @@
 
       box.classList.add('open');
       createParticles(30);
-      setTimeout(() => { isLocked = false; }, 850);
+
+      setTimeout(() => { isLocked = false; }, 900);
     });
 
     function resetCookie() {
       if (isLocked || !box.classList.contains('open')) return;
       isLocked = true;
 
-      // 1. 文字與紙條縮回
+      // 1. 先淡出文字
       text.style.transition = "opacity 0.2s";
-      text.style.opacity = '0';
-      paper.style.width = '0';
+      text.style.opacity = "0";
+
+      // 2. 強制隱藏紙條
+      paper.style.transition = "none";
+      paper.style.width = "0";
+      paper.style.visibility = "hidden";
 
       setTimeout(() => {
-        // 2. 餅乾合攏
+        // 3. 合起餅乾
         box.classList.remove('open');
-        
+
         setTimeout(() => {
-          // 3. 關鍵修復：清空文字並強制重設狀態
+          // 4. 清空文字
           document.getElementById('enText').textContent = "";
           document.getElementById('zhText').textContent = "";
-          text.style.transition = ""; 
-          
-          // 強制瀏覽器重刷元件
-          void box.offsetWidth; 
-          
+
+          // 5. 還原 transition
+          paper.style.transition = "";
+          text.style.transition = "";
+
+          // 6. 強制 reflow
+          void paper.offsetWidth;
+          void box.offsetWidth;
+
           isLocked = false;
         }, 800);
       }, 300);
     }
 
     function saveImage() {
+      if (!box.classList.contains('open')) return;
       html2canvas(document.getElementById('capture-area'), { backgroundColor: '#050505', scale: 2 }).then(canvas => {
         const link = document.createElement('a');
         link.download = 'fortune.png';
