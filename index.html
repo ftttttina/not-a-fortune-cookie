@@ -9,9 +9,9 @@
   <style>
     :root {
       --bg-color: #050505;
-      --paper-color: #fdfaf0;
+      /* 紙條底色改為帶有燒灼感的淺灰色 */
+      --paper-color: #c0c0c0;
       --base-scale: 1.32; 
-      /* 1. 光圈亮度調升至 0.6 */
       --glow-color: rgba(255, 250, 200, 0.6); 
     }
 
@@ -22,7 +22,7 @@
       overflow: hidden; position: relative;
     }
 
-    /* --- 包裝層 (0.01 透明度) --- */
+    /* --- 包裝層 (0.01 透明度 & 光影修復) --- */
     .package-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(255, 255, 255, 0.01); 
@@ -54,7 +54,7 @@
       100% { transform: translate(-30%, -30%); }
     }
 
-    /* --- 內容層 (初始放大 1.5 & 透明度 0.7) --- */
+    /* --- 內容層 (初始放大 & 0.7 初始透明度) --- */
     #capture-area { 
       padding: 40px 20px; 
       display: flex; flex-direction: column; align-items: center; 
@@ -71,7 +71,6 @@
       opacity: 1 !important; pointer-events: auto;
     }
 
-    /* UI 按鈕層 */
     .ui-layer { 
       margin-top: 40px; display: flex; gap: 12px; z-index: 10;
       opacity: 0; transform: translateY(20px);
@@ -106,47 +105,19 @@
     .cookie-box.open .left-part { transform: translate(-145px, -35px) rotate(-32deg); clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%); }
     .cookie-box.open .right-part { transform: translate(145px, -35px) rotate(32deg); clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%); }
 
-    /* 紙條 (90% 大小 & 加入垂直折痕) */
-  .paper-strip { 
-  position: absolute; 
-  top: 50%; 
-  left: 50%; 
-  width: 0; 
-  height: 80px; 
-  /* 改為淺灰色，並增加一點焦糊感 */
-  background: #c0c0c0; 
-  background-image: 
-    linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.15) 50%, transparent 52%), 
-    repeating-linear-gradient(rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 15px); 
-    
-  transform: translate(-50%, -50%); 
-  z-index: 2; 
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
-  
-  /* 增加邊緣焦化陰影與燒灼感 */
-  box-shadow: 
-    inset 0 0 15px rgba(0,0,0,0.2),
-    0 0 10px rgba(0,0,0,0.3); 
-    
-  /* 讓邊緣更不規則，像手撕或燒過的 */
-  clip-path: polygon(1% 4%, 98.5% 2%, 99.5% 96%, 1.5% 98%); 
-  overflow: hidden; 
-  visibility: hidden; 
-}
-
-/* 文字顏色微調，確保在灰紙上依舊清晰 */
-#enText { font-size: 11.2px; font-style: italic; font-weight: bold; margin-bottom: 4px; color: #111; letter-spacing: 0.1px; }
-#zhText { font-size: 8.1px; font-weight: 500; color: #333; letter-spacing: 1px; opacity: 0.9; }
+    /* 紙條效果：淺灰色、碳灰纖維紋理、燒灼感邊緣陰影 */
+    .paper-strip { 
+      position: absolute; top: 50%; left: 50%; width: 0; height: 80px; 
+      background: var(--paper-color); 
       background-image: 
-        linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.08) 50%, transparent 52%), 
-        repeating-linear-gradient(rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 18px); 
+        linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.15) 50%, transparent 52%), 
+        repeating-linear-gradient(rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 15px); 
       transform: translate(-50%, -50%); z-index: 2; display: flex; justify-content: center; align-items: center; 
       transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
-      box-shadow: 0 0 15px rgba(0,0,0,0.2); 
-      clip-path: polygon(0.5% 2%, 99.5% 1%, 99% 98%, 1% 99%); 
+      box-shadow: 
+        inset 0 0 15px rgba(0,0,0,0.2),
+        0 0 10px rgba(0,0,0,0.3); 
+      clip-path: polygon(1% 4%, 98.5% 2%, 99.5% 96%, 1.5% 98%); 
       overflow: hidden; visibility: hidden; 
     }
     .cookie-box.open .paper-strip { width: 256px; visibility: visible; }
@@ -155,9 +126,9 @@
     .cookie-box.open .paper-text { opacity: 1; }
     
     #enText { font-size: 11.2px; font-style: italic; font-weight: bold; margin-bottom: 4px; color: #111; letter-spacing: 0.1px; }
-    #zhText { font-size: 8.1px; font-weight: 500; color: #555; letter-spacing: 1px; opacity: 0.8; }
+    #zhText { font-size: 8.1px; font-weight: 500; color: #333; letter-spacing: 1px; opacity: 0.9; }
     
-    /* 2. 背景光圈 (增大半徑與亮度) */
+    /* 背景光圈 - 加強版 */
     .divine-glow { 
       position: absolute; top: 55%; left: 50%; width: 0; height: 0; 
       background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%); 
@@ -166,7 +137,7 @@
     }
     .cookie-box.open ~ .divine-glow { width: 650px; height: 550px; opacity: 1; }
     
-    /* 3. 底部標語亮度調優 (#666 -> #AAA) */
+    /* 底部標語亮度優化 */
     .footer-note { 
       position: absolute; bottom: 25px; width: 100%; text-align: center; 
       font-size: 9px; color: #666; letter-spacing: 5px; text-transform: uppercase; 
@@ -272,7 +243,7 @@
       html2canvas(area, { backgroundColor: '#050505', scale: 3 }).then(canvas => {
         const link = document.createElement('a');
         link.download = `fortune-${Date.now()}.png`;
-        link.href = canvas.toURL();
+        link.href = canvas.toDataURL();
         link.click();
         area.style.transform = originalTransform;
       });
