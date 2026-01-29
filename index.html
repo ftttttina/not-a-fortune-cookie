@@ -18,112 +18,129 @@
       margin: 0; background: var(--bg-color); color: #fff;
       font-family: "Palatino", serif; display: flex; flex-direction: column;
       justify-content: center; align-items: center; min-height: 100vh; 
-      overflow: hidden; position: relative; touch-action: none;
+      overflow: hidden; position: relative;
     }
 
-    /* --- 中央撕開包裝層 --- */
-    .package-container {
+    /* --- 包裝層 --- */
+    .package-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      z-index: 9999; display: flex; cursor: col-resize;
-      transition: visibility 1.2s; perspective: 1000px;
-    }
-
-    .package-wing {
-      flex: 1; height: 100%; position: relative;
-      background: rgba(255, 255, 255, 0.012);
-      backdrop-filter: blur(28px) saturate(120%);
-      -webkit-backdrop-filter: blur(28px) saturate(120%);
-      transition: transform 1.4s cubic-bezier(0.19, 1, 0.22, 1), opacity 1s;
+      background: rgba(255, 255, 255, 0.01); 
+      backdrop-filter: blur(25px) saturate(150%); 
+      -webkit-backdrop-filter: blur(25px) saturate(150%);
+      z-index: 9999; cursor: pointer;
       display: flex; justify-content: center; align-items: center;
-      overflow: hidden;
+      transition: transform 1.2s cubic-bezier(0.8, 0, 0.2, 1), opacity 1s ease, visibility 1.2s;
     }
-
-    .left-wing { border-right: 1px solid rgba(255,255,255,0.08); transform-origin: left center; }
-    .right-wing { border-left: 1px solid rgba(255,255,255,0.08); transform-origin: right center; }
-
-    /* 撕開動畫：帶有 3D 翻轉感 */
-    .unwrapped .left-wing { transform: translateX(-105%) rotateY(-30deg); opacity: 0; }
-    .unwrapped .right-wing { transform: translateX(105%) rotateY(30deg); opacity: 0; }
 
     .plastic-shine {
-      position: absolute; width: 200vw; height: 200vh;
-      background: linear-gradient(135deg, 
-        transparent 42%, 
-        rgba(255,255,255,0.03) 45%, 
-        rgba(255,255,255,0.15) 50%, 
-        rgba(255,255,255,0.03) 55%, 
-        transparent 58%);
-      animation: shine-swipe 12s infinite linear;
-      pointer-events: none; top: -50vh; left: -50vw;
+      position: absolute; width: 200%; height: 200%;
+      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%);
+      animation: shine 6s infinite ease-in-out;
+      pointer-events: none; z-index: 9999;
     }
 
-    .package-hint {
-      position: absolute; width: 100%; text-align: center;
-      bottom: 18%; color: rgba(255,255,255,0.35);
-      font-size: 10px; letter-spacing: 6px; text-transform: uppercase;
-      z-index: 10000; pointer-events: none;
+    .package-text {
+      font-size: 10px; letter-spacing: 12px; color: rgba(255,255,255,0.4); 
+      text-transform: uppercase; z-index: 10000; font-weight: 300;
     }
 
-    .tear-guide {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      display: flex; gap: 60px; color: rgba(255,255,255,0.15); font-size: 18px;
-      z-index: 10001; pointer-events: none;
+    .package-overlay.unwrapped { transform: translateY(-100%); opacity: 0; visibility: hidden; }
+
+    @keyframes shine {
+      0% { transform: translate(-30%, -30%); }
+      50% { transform: translate(10%, 10%); }
+      100% { transform: translate(-30%, -30%); }
     }
-    .tear-guide span { animation: pulse 2.5s infinite ease-in-out; }
 
-    @keyframes shine-swipe { 0% { transform: translateX(-15%) rotate(0deg); } 100% { transform: translateX(15%) rotate(360deg); } }
-    @keyframes pulse { 0%, 100% { opacity: 0.1; transform: scale(0.9); } 50% { opacity: 0.6; transform: scale(1.1); } }
-
-    /* --- 內容主體 --- */
+    /* --- 內容層 --- */
     #capture-area { 
-      padding: 40px 20px; display: flex; flex-direction: column; align-items: center; 
+      padding: 40px 20px; 
+      display: flex; flex-direction: column; align-items: center; 
       background: var(--bg-color); position: relative;
-      transform: scale(0.95); filter: blur(15px); opacity: 0;
-      transition: all 2s cubic-bezier(0.19, 1, 0.22, 1);
+      transform: scale(1.5); filter: blur(15px); opacity: 0.7;
+      transition: transform 1.5s cubic-bezier(0.2, 0, 0.2, 1), filter 1.2s ease, opacity 1.2s ease;
+      transform-origin: center center;
     }
-    body.ready #capture-area { transform: scale(1); filter: blur(0); opacity: 1; }
 
-    /* 其他 UI 與 餅乾邏輯 */
-    .header h1 { font-size: 22px; letter-spacing: 6px; font-weight: 300; margin: 0 0 25px 0; opacity: 0.6; text-transform: uppercase; }
-    .flavor-tabs { display: flex; gap: 8px; margin-bottom: 35px; z-index: 10; flex-wrap: wrap; justify-content: center; }
-    .tab-btn { background: transparent; border: 1px solid #333; color: #555; padding: 6px 12px; font-size: 10px; letter-spacing: 2px; cursor: pointer; transition: 0.4s; }
-    .tab-btn.active { background: #eee; color: #000; border-color: #eee; }
+    @media (max-width: 600px) { #capture-area { transform: scale(1.8); } }
+
+    body.ready #capture-area {
+      transform: scale(1) !important; filter: blur(0) !important; 
+      opacity: 1 !important; pointer-events: auto;
+    }
+
+    .header h1 { font-size: 22px; letter-spacing: 6px; font-weight: 300; margin: 0 0 25px 0; opacity: 0.7; text-transform: uppercase; }
+
+    /* --- 新版分類按鈕樣式 --- */
+    .flavor-tabs { 
+      display: flex; gap: 8px; margin-bottom: 35px; z-index: 10; 
+      flex-wrap: wrap; justify-content: center; max-width: 300px;
+    }
+    .tab-btn {
+      background: transparent; border: 1px solid #333; color: #666;
+      padding: 6px 12px; font-size: 10px; letter-spacing: 2px;
+      cursor: pointer; transition: all 0.4s; text-transform: uppercase;
+      min-width: 60px; height: auto;
+    }
+    .tab-btn.active {
+      background: #eee; color: #000; border-color: #eee;
+      box-shadow: 0 0 15px rgba(255,255,255,0.1);
+    }
+
+    /* 餅乾與紙條保持原樣 */
     .cookie-box { position: relative; width: calc(260px * var(--base-scale)); height: calc(200px * var(--base-scale)); cursor: pointer; perspective: 1200px; z-index: 3; }
     .full-cookie { position: absolute; width: 100%; height: 100%; z-index: 5; transition: opacity 0.2s; }
     .full-cookie img { width: 100%; height: 100%; object-fit: contain; }
+    
     .cookie-part { position: absolute; top: 0; width: 50%; height: 100%; overflow: hidden; opacity: 0; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s; z-index: 4; }
     .cookie-part img { position: absolute; width: 200%; height: 100%; object-fit: contain; }
     .left-part { left: 0; transform-origin: left bottom; clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%); }
     .right-part { right: 0; transform-origin: right bottom; clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%); }
-    .cookie-box.open .full-cookie { opacity: 0; }
+    
+    .cookie-box.open .full-cookie { opacity: 0; pointer-events: none; }
     .cookie-box.open .cookie-part { opacity: 0.4; }
     .cookie-box.open .left-part { transform: translate(-145px, -35px) rotate(-32deg); }
     .cookie-box.open .right-part { transform: translate(145px, -35px) rotate(32deg); }
-    .paper-strip { position: absolute; top: 50%; left: 50%; width: 0; height: 80px; background: var(--paper-color); transform: translate(-50%, -50%); z-index: 2; display: flex; justify-content: center; align-items: center; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: inset 0 0 15px rgba(0,0,0,0.2); clip-path: polygon(1% 4%, 98.5% 2%, 99.5% 96%, 1.5% 98%); overflow: hidden; visibility: hidden; }
+
+    .paper-strip { 
+      position: absolute; top: 50%; left: 50%; width: 0; height: 80px; 
+      background: var(--paper-color); 
+      background-image: linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.15) 50%, transparent 52%), repeating-linear-gradient(rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 15px); 
+      transform: translate(-50%, -50%); z-index: 2; display: flex; justify-content: center; align-items: center; 
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.2), 0 0 10px rgba(0,0,0,0.3); 
+      clip-path: polygon(1% 4%, 98.5% 2%, 99.5% 96%, 1.5% 98%); 
+      overflow: hidden; visibility: hidden; 
+    }
     .cookie-box.open .paper-strip { width: 256px; visibility: visible; }
     .paper-text { color: #1a1a1a; opacity: 0; text-align: center; width: 88%; line-height: 1.4; transition: opacity 0.4s 0.6s; }
     .cookie-box.open .paper-text { opacity: 1; }
     #enText { font-size: 11.2px; font-style: italic; font-weight: bold; margin-bottom: 4px; color: #111; }
-    #zhText { font-size: 8.1px; font-weight: 500; color: #333; }
+    #zhText { font-size: 8.1px; font-weight: 500; color: #333; letter-spacing: 1px; }
+    
     .divine-glow { position: absolute; top: 55%; left: 50%; width: 0; height: 0; background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%); transform: translate(-50%, -50%); border-radius: 50%; filter: blur(40px); transition: all 1.2s ease-out; opacity: 0; z-index: 1; }
     .cookie-box.open ~ .divine-glow { width: 650px; height: 550px; opacity: 1; }
-    .footer-note { position: absolute; bottom: 25px; width: 100%; text-align: center; font-size: 9px; color: #444; letter-spacing: 5px; text-transform: uppercase; }
+    
+    .footer-note { position: absolute; bottom: 25px; width: 100%; text-align: center; font-size: 9px; color: #666; letter-spacing: 5px; text-transform: uppercase; pointer-events: none; transition: all 1s ease; opacity: 0.8; }
+    .cookie-box.open ~ .footer-note { color: #aaa; opacity: 1; }
+
     .ui-layer { margin-top: 40px; display: flex; gap: 12px; z-index: 10; opacity: 0; transform: translateY(20px); transition: all 1s ease 0.5s; }
     body.ready .ui-layer { opacity: 1; transform: translateY(0); pointer-events: auto; }
-    .action-btn { background: transparent; color: #666; border: 1px solid #333; padding: 0 20px; cursor: pointer; font-size: 11px; height: 42px; min-width: 125px; }
+    .action-btn { background: transparent; color: #666; border: 1px solid #333; padding: 0 20px; cursor: pointer; font-size: 11px; height: 42px; min-width: 125px; transition: 0.3s; }
+    .action-btn:hover { color: #fff; border-color: #777; background: #111; }
+    .particle { position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: #444; pointer-events: none; z-index: 6; }
   </style>
 </head>
 <body>
 
-  <div class="package-container" id="packageContainer">
-    <div class="package-wing left-wing"><div class="plastic-shine"></div></div>
-    <div class="package-wing right-wing"><div class="plastic-shine" style="left: -150vw;"></div></div>
-    <div class="tear-guide"><span>←</span><span>→</span></div>
-    <div class="package-hint">Swipe apart to open</div>
+  <div class="package-overlay" id="packageOverlay" onclick="unwrapCookie()">
+    <div class="plastic-shine"></div>
+    <div class="package-text">TAP TO UNWRAP</div>
   </div>
 
   <div id="capture-area">
     <div class="header"><h1>Black Fortune</h1></div>
+    
     <div class="flavor-tabs" id="flavorTabs">
       <button class="tab-btn active" onclick="setFlavor('life', this)">LIFE 生活</button>
       <button class="tab-btn" onclick="setFlavor('work', this)">WORK 職場</button>
@@ -135,7 +152,12 @@
       <div class="full-cookie"><img src="black-cookie.png" crossorigin="anonymous"></div>
       <div class="cookie-part left-part"><img src="black-cookie.png" crossorigin="anonymous"></div>
       <div class="cookie-part right-part"><img src="black-cookie.png" crossorigin="anonymous"></div>
-      <div class="paper-strip"><div class="paper-text"><div id="enText"></div><div id="zhText"></div></div></div>
+      <div class="paper-strip" id="paperStrip">
+        <div class="paper-text" id="paperText">
+          <div id="enText"></div>
+          <div id="zhText"></div>
+        </div>
+      </div>
     </div>
     <div class="divine-glow"></div>
     <div class="footer-note">If it hurts, it works</div>
@@ -152,48 +174,29 @@
     let currentFlavor = 'life';
     let isLocked = false; 
     let isUnwrapped = false; 
-
-    // 音效載入
-    const crackSound = new Audio('crack.mp3');
-    const ripSound = new Audio('rip.mp3'); // 這裡需要一個塑料撕開的聲音檔
-
-    const container = document.getElementById('packageContainer');
     const box = document.getElementById('cookieBox');
+    const crackSound = new Audio('crack.mp3'); 
 
-    // --- 左右撕開交互 ---
-    let startX = 0;
-    container.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
-    container.addEventListener('touchend', e => {
-      let endX = e.changedTouches[0].clientX;
-      if (Math.abs(startX - endX) > 60) unwrap();
-    });
-    container.addEventListener('click', unwrap);
-
-    function unwrap() {
-      if (isUnwrapped) return;
-      isUnwrapped = true;
-      
-      // 播放撕開音效
-      ripSound.currentTime = 0;
-      ripSound.play().catch(()=>{});
-      
-      // 如果支援震動 (手機端體驗)
-      if (window.navigator.vibrate) window.navigator.vibrate(20);
-
-      container.classList.add('unwrapped');
-      document.body.classList.add('ready');
-      setTimeout(() => { container.style.display = 'none'; }, 1400);
-    }
-
-    // --- 遊戲邏輯 ---
     fetch(GITHUB_JSON_URL).then(res => res.json()).then(data => { fortunesData = data; });
 
     function setFlavor(flavor, btn) {
       if (isLocked) return;
       currentFlavor = flavor;
+      // 切換按鈕樣式
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      if (box.classList.contains('open')) resetCookie();
+      // 如果已經打開了，切換類別時自動重置
+      if (box.classList.contains('open')) {
+        resetCookie();
+      }
+    }
+
+    function unwrapCookie() {
+      if (isUnwrapped) return;
+      isUnwrapped = true;
+      document.getElementById('packageOverlay').classList.add('unwrapped');
+      document.body.classList.add('ready');
+      setTimeout(() => { document.getElementById('packageOverlay').style.display = 'none'; }, 1200);
     }
 
     box.addEventListener('click', () => {
@@ -204,8 +207,9 @@
       document.getElementById('enText').textContent = item.en;
       document.getElementById('zhText').textContent = item.zh;
       crackSound.currentTime = 0;
-      crackSound.play().catch(()=>{});
+      crackSound.play().catch(() => {});
       box.classList.add('open');
+      createParticles(25);
       setTimeout(() => { isLocked = false; }, 950);
     });
 
@@ -213,27 +217,49 @@
       if (isLocked || !box.classList.contains('open')) return;
       isLocked = true;
       box.classList.remove('open');
-      setTimeout(() => { isLocked = false; }, 850);
+      setTimeout(() => {
+        document.getElementById('enText').textContent = "";
+        document.getElementById('zhText').textContent = "";
+        isLocked = false;
+      }, 850);
     }
 
     function saveImage() {
-      if (!box.classList.contains('open')) return;
+      if (!box.classList.contains('open')) { alert("Please crack the cookie first!"); return; }
       const area = document.getElementById('capture-area');
+      const btn = event.currentTarget;
+      btn.textContent = "GENERATING...";
       const originalTransform = area.style.transform;
       area.style.transform = "none";
-      html2canvas(area, { backgroundColor: '#050505', scale: 2, useCORS: true }).then(canvas => {
+      html2canvas(area, { backgroundColor: '#050505', scale: window.devicePixelRatio || 2, useCORS: true }).then(canvas => {
         const imgData = canvas.toDataURL("image/png");
         if (navigator.userAgent.match(/(iPhone|iPod|iPad|Android)/i)) {
           const newWindow = window.open();
           newWindow.document.write(`<img src="${imgData}" style="width:100%;" />`);
         } else {
           const link = document.createElement('a');
-          link.download = `fortune.png`;
+          link.download = `fortune-${Date.now()}.png`;
           link.href = imgData;
           link.click();
         }
         area.style.transform = originalTransform;
+        btn.textContent = "SHARE WISDOM";
       });
+    }
+
+    function createParticles(count) {
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.classList.add('particle');
+        box.appendChild(p);
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 70 + Math.random() * 90;
+        p.animate([
+          { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+          { transform: `translate(calc(-50% + ${Math.cos(angle)*velocity}px), calc(-50% + ${Math.sin(angle)*velocity}px)) scale(0)`, opacity: 0 }
+        ], { duration: 850, fill: 'forwards' });
+        setTimeout(() => p.remove(), 900);
+      }
     }
   </script>
 </body>
