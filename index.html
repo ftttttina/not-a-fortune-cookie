@@ -9,7 +9,6 @@
   <style>
     :root {
       --bg-color: #050505;
-      /* 這裡同步了你要求的淺灰色焦灼感紙張 */
       --paper-color: #c0c0c0;
       --base-scale: 1.32; 
       --glow-color: rgba(255, 250, 200, 0.6); 
@@ -43,7 +42,6 @@
     .package-text {
       font-size: 10px; letter-spacing: 12px; color: rgba(255,255,255,0.4); 
       text-transform: uppercase; z-index: 10000; font-weight: 300;
-      text-shadow: 0 0 10px rgba(255,255,255,0.2);
     }
 
     .package-overlay.unwrapped { transform: translateY(-100%); opacity: 0; visibility: hidden; }
@@ -71,46 +69,43 @@
       opacity: 1 !important; pointer-events: auto;
     }
 
-    .ui-layer { 
-      margin-top: 40px; display: flex; gap: 12px; z-index: 10;
-      opacity: 0; transform: translateY(20px);
-      transition: all 1s ease 0.5s;
-    }
-    body.ready .ui-layer { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .header h1 { font-size: 22px; letter-spacing: 6px; font-weight: 300; margin: 0 0 25px 0; opacity: 0.7; text-transform: uppercase; }
 
-    .header h1 { font-size: 22px; letter-spacing: 6px; font-weight: 300; margin: 0 0 20px 0; opacity: 0.7; text-transform: uppercase; }
-
-    .flavor-picker { margin-bottom: 30px; z-index: 10; display: flex; justify-content: center; }
-    select { 
-      background: rgba(255,255,255,0.1); color: #bbb; border: 1px solid #444; 
-      padding: 10px 0; width: 160px; cursor: pointer; font-size: 13px; 
-      border-radius: 0; outline: none; -webkit-appearance: none; -moz-appearance: none; appearance: none;
-      text-align: center; text-align-last: center;
+    /* --- 新版分類按鈕樣式 --- */
+    .flavor-tabs { 
+      display: flex; gap: 8px; margin-bottom: 35px; z-index: 10; 
+      flex-wrap: wrap; justify-content: center; max-width: 300px;
     }
-    
+    .tab-btn {
+      background: transparent; border: 1px solid #333; color: #666;
+      padding: 6px 12px; font-size: 10px; letter-spacing: 2px;
+      cursor: pointer; transition: all 0.4s; text-transform: uppercase;
+      min-width: 60px; height: auto;
+    }
+    .tab-btn.active {
+      background: #eee; color: #000; border-color: #eee;
+      box-shadow: 0 0 15px rgba(255,255,255,0.1);
+    }
+
+    /* 餅乾與紙條保持原樣 */
     .cookie-box { position: relative; width: calc(260px * var(--base-scale)); height: calc(200px * var(--base-scale)); cursor: pointer; perspective: 1200px; z-index: 3; }
     .full-cookie { position: absolute; width: 100%; height: 100%; z-index: 5; transition: opacity 0.2s; }
     .full-cookie img { width: 100%; height: 100%; object-fit: contain; }
     
     .cookie-part { position: absolute; top: 0; width: 50%; height: 100%; overflow: hidden; opacity: 0; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s; z-index: 4; }
     .cookie-part img { position: absolute; width: 200%; height: 100%; object-fit: contain; }
-    .left-part { left: 0; transform-origin: left bottom; }
-    .left-part img { left: 0; object-position: left center; }
-    .right-part { right: 0; transform-origin: right bottom; }
-    .right-part img { right: 0; object-position: right center; }
+    .left-part { left: 0; transform-origin: left bottom; clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%); }
+    .right-part { right: 0; transform-origin: right bottom; clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%); }
     
     .cookie-box.open .full-cookie { opacity: 0; pointer-events: none; }
-    .cookie-box.open .cookie-part { opacity: 0.4; filter: blur(0.3px); }
-    .cookie-box.open .left-part { transform: translate(-145px, -35px) rotate(-32deg); clip-path: polygon(0% 0%, 100% 0%, 92% 15%, 100% 30%, 88% 45%, 95% 60%, 85% 75%, 100% 90%, 100% 100%, 0% 100%); }
-    .cookie-box.open .right-part { transform: translate(145px, -35px) rotate(32deg); clip-path: polygon(8% 15%, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 90%, 15% 75%, 5% 60%, 12% 45%, 0% 30%); }
+    .cookie-box.open .cookie-part { opacity: 0.4; }
+    .cookie-box.open .left-part { transform: translate(-145px, -35px) rotate(-32deg); }
+    .cookie-box.open .right-part { transform: translate(145px, -35px) rotate(32deg); }
 
-    /* 紙條優化：灰色焦痕質感 */
     .paper-strip { 
       position: absolute; top: 50%; left: 50%; width: 0; height: 80px; 
       background: var(--paper-color); 
-      background-image: 
-        linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.15) 50%, transparent 52%), 
-        repeating-linear-gradient(rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 15px); 
+      background-image: linear-gradient(90deg, transparent 48%, rgba(0,0,0,0.15) 50%, transparent 52%), repeating-linear-gradient(rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 15px); 
       transform: translate(-50%, -50%); z-index: 2; display: flex; justify-content: center; align-items: center; 
       transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
       box-shadow: inset 0 0 15px rgba(0,0,0,0.2), 0 0 10px rgba(0,0,0,0.3); 
@@ -118,30 +113,21 @@
       overflow: hidden; visibility: hidden; 
     }
     .cookie-box.open .paper-strip { width: 256px; visibility: visible; }
-    
-    .paper-text { color: #1a1a1a; opacity: 0; text-align: center; width: 88%; word-wrap: break-word; line-height: 1.4; transition: opacity 0.4s 0.6s; }
+    .paper-text { color: #1a1a1a; opacity: 0; text-align: center; width: 88%; line-height: 1.4; transition: opacity 0.4s 0.6s; }
     .cookie-box.open .paper-text { opacity: 1; }
+    #enText { font-size: 11.2px; font-style: italic; font-weight: bold; margin-bottom: 4px; color: #111; }
+    #zhText { font-size: 8.1px; font-weight: 500; color: #333; letter-spacing: 1px; }
     
-    #enText { font-size: 11.2px; font-style: italic; font-weight: bold; margin-bottom: 4px; color: #111; letter-spacing: 0.1px; }
-    #zhText { font-size: 8.1px; font-weight: 500; color: #333; letter-spacing: 1px; opacity: 0.9; }
-    
-    .divine-glow { 
-      position: absolute; top: 55%; left: 50%; width: 0; height: 0; 
-      background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%); 
-      transform: translate(-50%, -50%); border-radius: 50%; filter: blur(40px); 
-      transition: all 1.2s ease-out; opacity: 0; z-index: 1; 
-    }
+    .divine-glow { position: absolute; top: 55%; left: 50%; width: 0; height: 0; background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%); transform: translate(-50%, -50%); border-radius: 50%; filter: blur(40px); transition: all 1.2s ease-out; opacity: 0; z-index: 1; }
     .cookie-box.open ~ .divine-glow { width: 650px; height: 550px; opacity: 1; }
     
-    .footer-note { 
-      position: absolute; bottom: 25px; width: 100%; text-align: center; 
-      font-size: 9px; color: #666; letter-spacing: 5px; text-transform: uppercase; 
-      pointer-events: none; transition: all 1s ease; opacity: 0.8;
-    }
-    .cookie-box.open ~ .footer-note { color: #aaa; opacity: 1; letter-spacing: 6px; }
+    .footer-note { position: absolute; bottom: 25px; width: 100%; text-align: center; font-size: 9px; color: #666; letter-spacing: 5px; text-transform: uppercase; pointer-events: none; transition: all 1s ease; opacity: 0.8; }
+    .cookie-box.open ~ .footer-note { color: #aaa; opacity: 1; }
 
-    button { background: transparent; color: #666; border: 1px solid #333; padding: 0 20px; cursor: pointer; font-size: 11px; transition: 0.3s; letter-spacing: 1px; display: inline-flex; align-items: center; justify-content: center; height: 42px; line-height: 1; min-width: 125px; box-sizing: border-box; }
-    button:hover { color: #fff; border-color: #777; background: #111; }
+    .ui-layer { margin-top: 40px; display: flex; gap: 12px; z-index: 10; opacity: 0; transform: translateY(20px); transition: all 1s ease 0.5s; }
+    body.ready .ui-layer { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .action-btn { background: transparent; color: #666; border: 1px solid #333; padding: 0 20px; cursor: pointer; font-size: 11px; height: 42px; min-width: 125px; transition: 0.3s; }
+    .action-btn:hover { color: #fff; border-color: #777; background: #111; }
     .particle { position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: #444; pointer-events: none; z-index: 6; }
   </style>
 </head>
@@ -154,20 +140,18 @@
 
   <div id="capture-area">
     <div class="header"><h1>Black Fortune</h1></div>
-    <div class="flavor-picker">
-      <select id="flavor">
-        <option value="life">LIFE 生活</option>
-        <option value="work">WORK 職場</option>
-        <option value="love">LOVE 情感</option>
-        <option value="money">MONEY 金錢</option>
-      </select>
+    
+    <div class="flavor-tabs" id="flavorTabs">
+      <button class="tab-btn active" onclick="setFlavor('life', this)">LIFE 生活</button>
+      <button class="tab-btn" onclick="setFlavor('work', this)">WORK 職場</button>
+      <button class="tab-btn" onclick="setFlavor('love', this)">LOVE 情感</button>
+      <button class="tab-btn" onclick="setFlavor('money', this)">MONEY 金錢</button>
     </div>
 
     <div class="cookie-box" id="cookieBox">
       <div class="full-cookie"><img src="black-cookie.png" crossorigin="anonymous"></div>
       <div class="cookie-part left-part"><img src="black-cookie.png" crossorigin="anonymous"></div>
       <div class="cookie-part right-part"><img src="black-cookie.png" crossorigin="anonymous"></div>
-
       <div class="paper-strip" id="paperStrip">
         <div class="paper-text" id="paperText">
           <div id="enText"></div>
@@ -180,35 +164,45 @@
   </div>
 
   <div class="ui-layer">
-    <button onclick="resetCookie()">RESET DESTINY</button>
-    <button onclick="saveImage()">SHARE WISDOM</button>
+    <button class="action-btn" onclick="resetCookie()">RESET DESTINY</button>
+    <button class="action-btn" onclick="saveImage()">SHARE WISDOM</button>
   </div>
 
   <script>
     const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/ftttttina/not-a-fortune-cookie/refs/heads/main/fortunes.json';
     let fortunesData = null;
+    let currentFlavor = 'life';
     let isLocked = false; 
     let isUnwrapped = false; 
-    
     const box = document.getElementById('cookieBox');
     const crackSound = new Audio('crack.mp3'); 
 
     fetch(GITHUB_JSON_URL).then(res => res.json()).then(data => { fortunesData = data; });
 
+    function setFlavor(flavor, btn) {
+      if (isLocked) return;
+      currentFlavor = flavor;
+      // 切換按鈕樣式
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      // 如果已經打開了，切換類別時自動重置
+      if (box.classList.contains('open')) {
+        resetCookie();
+      }
+    }
+
     function unwrapCookie() {
       if (isUnwrapped) return;
       isUnwrapped = true;
-      const overlay = document.getElementById('packageOverlay');
-      overlay.classList.add('unwrapped');
+      document.getElementById('packageOverlay').classList.add('unwrapped');
       document.body.classList.add('ready');
-      setTimeout(() => { overlay.style.display = 'none'; }, 1200);
+      setTimeout(() => { document.getElementById('packageOverlay').style.display = 'none'; }, 1200);
     }
 
     box.addEventListener('click', () => {
       if (!isUnwrapped || isLocked || !fortunesData || box.classList.contains('open')) return;
       isLocked = true;
-      const flavor = document.getElementById('flavor').value;
-      const list = fortunesData[flavor];
+      const list = fortunesData[currentFlavor];
       const item = list[Math.floor(Math.random() * list.length)];
       document.getElementById('enText').textContent = item.en;
       document.getElementById('zhText').textContent = item.zh;
@@ -230,49 +224,24 @@
       }, 850);
     }
 
-    // --- 修復後的截圖函數 ---
     function saveImage() {
-      if (!box.classList.contains('open')) {
-        alert("Please crack the cookie first!");
-        return;
-      }
-      
+      if (!box.classList.contains('open')) { alert("Please crack the cookie first!"); return; }
       const area = document.getElementById('capture-area');
       const btn = event.currentTarget;
       btn.textContent = "GENERATING...";
-      
-      // 1. 手機端截圖前暫時關閉 transform 縮放，避免 html2canvas 偏移
       const originalTransform = area.style.transform;
       area.style.transform = "none";
-
-      html2canvas(area, {
-        backgroundColor: '#050505',
-        scale: window.devicePixelRatio || 2, // 根據設備像素比自動縮放，保證清晰度
-        useCORS: true,      // 允許跨域圖片
-        allowTaint: false,  // 防止污染畫布
-        logging: false
-      }).then(canvas => {
-        try {
-          const imgData = canvas.toDataURL("image/png");
+      html2canvas(area, { backgroundColor: '#050505', scale: window.devicePixelRatio || 2, useCORS: true }).then(canvas => {
+        const imgData = canvas.toDataURL("image/png");
+        if (navigator.userAgent.match(/(iPhone|iPod|iPad|Android)/i)) {
+          const newWindow = window.open();
+          newWindow.document.write(`<img src="${imgData}" style="width:100%;" />`);
+        } else {
           const link = document.createElement('a');
           link.download = `fortune-${Date.now()}.png`;
           link.href = imgData;
-          
-          // 針對 iOS/Android 兼容處理
-          if (navigator.userAgent.match(/(iPhone|iPod|iPad|Android)/i)) {
-            // 手機端若無法自動下載，則打開新分頁顯示圖片，提示用戶長按儲存
-            const newWindow = window.open();
-            newWindow.document.write(`<img src="${imgData}" style="width:100%;" />`);
-            newWindow.document.title = "Long press to save your fortune";
-          } else {
-            link.click();
-          }
-        } catch (err) {
-          console.error("Capture failed:", err);
-          alert("Capture failed. Please take a screenshot manually.");
+          link.click();
         }
-        
-        // 恢復原始狀態
         area.style.transform = originalTransform;
         btn.textContent = "SHARE WISDOM";
       });
